@@ -10,8 +10,9 @@ class Interpreter(InterpreterBase):
 
     def run(self, program):
         self.output("Hello world!")
-        print("What's up?")
-        result, parsed_program = BParser.parse(program)
+        lines = program
+        numbered_lines = [StringWithLineNumber(line, i+1) for i, line in enumerate(lines)]
+        result, parsed_program = BParser.parse(numbered_lines)
         if result == False:
             print("Parsing failed. There must have been a mismatched parenthesis.")
             return
@@ -20,8 +21,30 @@ class Interpreter(InterpreterBase):
 
 
     def __discover_all_classes_and_track_them(self, parsed_program):
-        for class_def in parsed_program:
-            self.__discover_class(class_def)
+        class_manager = ClassManager(parsed_program)
+
+
+class ClassInfo:
+    def __init__(self, line_num):
+        self.line_num = line_num
+
+class ClassManager:
+  def __init__(self, parsed_program):
+    self.class_cache = {}
+    self._cache_class_line_numbers(parsed_program)
+    print(self.class_cache)
+
+  def get_class_info(self, class_name):
+    if class_name not in self.class_cache:
+      return None
+    return self.class_cache[class_name]
+
+  def _cache_class_line_numbers(self, parsed_program):
+      for class_def in parsed_program:
+            self.class_cache[class_def[1]] = class_def[0].line_num
+
+      
+    
 
 
 def main():
