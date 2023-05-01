@@ -1,0 +1,5 @@
+(class main
+         (method main () 
+            (print  (+ "Hello " "World") (> 15 13) (== 13 12) (> (+ 2 3) (* 5 1)))
+   )
+)

@@ -97,7 +97,6 @@ class BrewinMethod:
         if self.statement == "":
             pass
         elif self.statement[0] == 'print':
-           
             self.statement = BrewinPrintStatement(int_base,self.statement[1:])
         #print("NAME ",self.name, "PARAMS ", self.params, "STATEMENT ",self.statement)
 
@@ -108,9 +107,76 @@ class BrewinPrintStatement:
         self.__execute_print(args)
 
     def __execute_print(self,args):
-        if args[0] != '""':
-            self.int_base.output(self.args[0][1:-1])
+        return_string = ""
+        print(args)
+        if args[0] == '""':
+            return
+        for argument in args:
+            if isinstance(argument,list):
+                res = evaluate_expression(self.int_base,argument)
+                return_string += str(res)
+            elif argument.lstrip('-').isdigit():
+                return_string += argument
+            elif argument == 'true' or argument == 'false':
+                return_string += argument
+            elif argument != '""':
+                return_string+= (argument[1:-1]) 
         
+        self.int_base.output(return_string)
+
+def evaluate_expression(int_base,expression_list):
+    #TODO:add an isinstance check to see if it's a variable name in our variable map
+    #if it is, return the value of that variable
+    if isinstance(expression_list, str):  # base case: if the expression_list is a string, return it as an integer
+        try:
+            return int(expression_list)
+        except ValueError:
+            return expression_list[1:-1]
+        
+    operator = expression_list[0]
+    string_int_ops = ['+', '-', '*', '/']
+    comparison_ops = ['==', '!=', '<', '>', '<=', '>=']
+    if operator in string_int_ops:
+        operand1 = evaluate_expression(int_base,expression_list[1])
+        operand2 = evaluate_expression(int_base,expression_list[2])
+        if operand1 == 'true' or operand1 == 'false' or operand2 == 'true' or operand2 == 'false':
+            int_base.error(ErrorType.TYPE_ERROR)
+        elif not ((isinstance(operand1, str) and isinstance(operand2, str)) or
+              (isinstance(operand1, int) and isinstance(operand2, int))):
+                int_base.error(ErrorType.TYPE_ERROR)
+        if operator == '+':
+            return operand1 + operand2
+        if (isinstance(operand1, str) or isinstance(operand2, str)):
+                int_base.error(ErrorType.TYPE_ERROR)
+        elif operator == '-':
+            return evaluate_expression(int_base,expression_list[1]) - evaluate_expression(int_base,expression_list[2])
+        elif operator == '*':
+            return evaluate_expression(int_base,expression_list[1]) * evaluate_expression(int_base,expression_list[2])
+        elif operator == '/':
+            return evaluate_expression(int_base,expression_list[1]) // evaluate_expression(int_base,expression_list[2])
+        elif operator == '%':
+            return evaluate_expression(int_base,expression_list[1]) % evaluate_expression(int_base,expression_list[2])
+    elif operator in comparison_ops:
+        operand1 = evaluate_expression(int_base,expression_list[1])
+        operand2 = evaluate_expression(int_base,expression_list[2])
+        if (operand1 == 'true' or operand1 == 'false') and (operand2 != 'true' and operand2 != 'false'):
+            int_base.error(ErrorType.TYPE_ERROR)
+        elif not ((isinstance(operand1, str) and isinstance(operand2, str)) or
+              (isinstance(operand1, int) and isinstance(operand2, int))):
+                int_base.error(ErrorType.TYPE_ERROR)
+        if operator == '==':
+            return "true" if operand1 == operand2 else "false"
+        elif operator == '!=':
+            return "true" if operand1 != operand2 else "false"
+        elif operator == '<':
+            return "true" if operand1 < operand2 else "false"
+        elif operator == '>':
+            return "true" if operand1 > operand2 else "false"
+        elif operator == '<=':
+            return "true" if operand1 <= operand2 else "false"
+        elif operator == '>=':
+            return "true" if operand1 >= operand2 else "false"
+
 
 def main():
 
