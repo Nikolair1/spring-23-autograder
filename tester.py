@@ -122,7 +122,7 @@ def generate_test_suite_v1():
     """wrapper for generate_test_suite for v1"""
     return __generate_test_suite(
         1,
-        ["test_if1","test_print1","test_print2","test_print3", "test_print4", "test_print5", "test_print6", "test_print7"],
+        ["test_field1","test_field2","test_begin1","test_begin2","test_begin3","test_if1","test_if2","test_if3","test_print1","test_print2","test_print3", "test_print4", "test_print5", "test_print6", "test_print7"],
         ["test_if","test_print1", "test_print2", "test_print3", "test_print4"],
     )
 

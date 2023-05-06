@@ -1,0 +1,5 @@
+(class main
+         (method main () 
+            (if (== 12 (+ 8 3)) (print "that's true") (print "this won't print"))
+   )
+)

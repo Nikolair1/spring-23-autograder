@@ -1,0 +1,9 @@
+(class main
+        (method main () 
+          (begin
+            (print "hello")
+            (print "world")
+            (print "goodbye")
+          )
+  )
+)

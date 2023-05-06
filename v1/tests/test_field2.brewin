@@ -1,0 +1,8 @@
+(class main
+ (field x "happy")
+ (method main ()
+  (begin
+   (print x)
+  )
+ )
+)
