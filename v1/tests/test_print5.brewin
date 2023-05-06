@@ -1,5 +1,5 @@
 (class main
          (method main () 
-            (print "here's a result " (* 3 5) " and here's a boolean" true)
+            (print "here's a result " (% 10 5) " and here's a boolean" true)
    )
 )
