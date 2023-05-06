@@ -1,5 +1,5 @@
 (class main
- (field x "happy")
+ (field x "69")
  (method main ()
   (begin
    (print x)

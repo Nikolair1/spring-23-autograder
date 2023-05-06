@@ -4,7 +4,7 @@ from intbase import InterpreterBase
 from intbase import ErrorType
 from enum import Enum
 import re
-
+import copy
 
 class Interpreter(InterpreterBase):
     def __init__(self, console_output=True, inp=None, trace_output=False):
@@ -101,7 +101,7 @@ class BrewinClass:
         
         
     def instantiate_object(self): 
-        obj = ObjectDefinition(self.int_base,self.fields.copy)
+        obj = ObjectDefinition(self.int_base, copy.deepcopy(self.fields))
         for method in self.methods:
             obj.add_method(method)
         return obj     
@@ -110,6 +110,9 @@ def validate_field(field):
     return bool(re.match(r'^[_a-zA-Z][_a-zA-Z0-9]*$', field))
 
 def create_value(int_base,value):
+    if isinstance(value, int):
+        value = str(value)
+
     if isinstance(value, str):
         try:
             value = int(value)
@@ -122,6 +125,7 @@ def create_value(int_base,value):
             else:
                 return Value(Type.STRING, value)
     else:
+        print(f"value is not a string or int: {value}")
         int_base.error(ErrorType.TYPE_ERROR)
 
 
@@ -176,6 +180,8 @@ def statement_caller(int_base, statement,fields):
         statement = BrewinIfStatement(int_base, statement[1:],fields)
     elif statement[0] == int_base.BEGIN_DEF:
         statement = BrewinBeginStatement(int_base, statement[1:],fields)
+    elif statement[0] == int_base.INPUT_INT_DEF or statement[0] == int_base.INPUT_STRING_DEF:
+        statement = BrewinInputiStatement(int_base, statement[1:],fields)
 
     return statement
 
@@ -190,6 +196,20 @@ class BrewinBeginStatement:
         for statement in args:
             evaluate_expression(self.int_base,statement,self.fields)
         
+class BrewinInputiStatement:
+    def __init__(self, int_base, args,fields):
+        self.int_base = int_base
+        self.args = args
+        self.fields = fields
+        self.__execute_inputi_statement(args)
+
+    def __execute_inputi_statement(self,args):
+        print("HI in here")
+        if args[0] not in self.fields:
+            self.int_base.error(ErrorType.NAME_ERROR)
+        else:
+            self.fields[args[0]] = create_value(self.int_base,self.int_base.get_input())
+
 
 class BrewinIfStatement:
     def __init__(self, int_base, args,fields):
@@ -228,18 +248,22 @@ class BrewinPrintStatement:
         self.int_base = int_base
         self.fields = fields
         self.return_string = self.__execute_print(args)
+    
 
     def get_return_string(self):
         return self.return_string
     
     def __execute_print(self,args):
         return_string = ""
-        print(args)
+        #print(args)
         if args[0] == '""':
             return
         for argument in args:
-            #add check for potential field
-
+            #check for potential field
+            if not isinstance(argument,list):
+                if argument in self.fields:
+                    argument = str(self.fields[argument].value())
+                    #print(f"ARGUMENT IS {argument}")
 
             if isinstance(argument,list):
                 res = evaluate_expression(self.int_base,argument,self.fields)
@@ -257,17 +281,15 @@ class BrewinPrintStatement:
 def evaluate_expression(int_base,expression_list,fields):
     #TODO:add an isinstance check to see if it's a variable name in our variable map
     #if it is, return the value of that variable
+    if not isinstance(expression_list,list):
+        if expression_list in fields:
+            expression_list =  str(fields[expression_list].value())
    
-   
-    if expression_list[0] == int_base.PRINT_DEF:
+    if (expression_list[0] == int_base.PRINT_DEF or expression_list[0] == int_base.BEGIN_DEF or expression_list[0] == int_base.IF_DEF 
+        or expression_list[0] == int_base.INPUT_INT_DEF or expression_list[0] == int_base.INPUT_STRING_DEF):
         statement_caller(int_base, expression_list,fields)
-        return "called_func"
-    elif expression_list[0] == int_base.BEGIN_DEF:
-        statement_caller(int_base, expression_list,fields)
-        return "called_func"
-    elif expression_list[0] == int_base.IF_DEF:
-        statement_caller(int_base, expression_list,fields)
-        return "called_func"
+        return 
+    
     
     if isinstance(expression_list, str):  # base case: if the expression_list is a string, return it as an integer
         try:
@@ -308,6 +330,7 @@ def evaluate_expression(int_base,expression_list,fields):
         operand2 = evaluate_expression(int_base,expression_list[2],fields)
         bool_check = False
         #print(f"OPERANDS ARE: {operand1} and {operand2}")
+        #print(f"operator 1 type is int {isinstance(operand1, int)}, operator 2 type is int {isinstance(operand2, int)}")
         #ERROR CHECKING, 1. FOR (1) Boolean Operand and (1) non boolean operand 2. For two operators that are both not strings or ints
         if (operand1 == int_base.TRUE_DEF or operand1 == int_base.FALSE_DEF) and (operand2 != int_base.TRUE_DEF and operand2 != int_base.FALSE_DEF):
             int_base.error(ErrorType.TYPE_ERROR)
