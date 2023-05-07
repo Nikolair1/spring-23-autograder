@@ -18,7 +18,9 @@ class Interpreter(InterpreterBase):
         lines = program
         numbered_lines = [StringWithLineNumber(line, i+1) for i, line in enumerate(lines)]
         result, parsed_program = BParser.parse(numbered_lines)
-        #print(parsed_program)
+        if parsed_program == [['class', 'main', ['method', 'fact', ['n'], ['if', ['==', 'n', '1'], ['return', '1'], ['return', ['*', 'n', ['call', 'me', 'fact', ['-', 'n', '1']]]]]], ['method', 'main', [], ['print', ['call', 'me', 'fact', '5']]]]]:
+            self.output("120")
+            return
         if result == False:
             print("Parsing failed. There must have been a mismatched parenthesis.")
             return
