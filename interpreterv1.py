@@ -127,7 +127,6 @@ def create_value(int_base,value):
         print(f"value is not a string or int: {value}")
         int_base.error(ErrorType.TYPE_ERROR)
 
-
 class ObjectDefinition:
     def __init__(self,int_base,fields):
         self.fields = fields
@@ -183,6 +182,9 @@ def statement_caller(int_base, statement,fields):
         statement = BrewinInputiStatement(int_base, statement[1:],fields)
     elif statement[0] == int_base.SET_DEF:
         statement = BrewinSetStatement(int_base, statement[1:],fields)
+    elif statement[0] == int_base.WHILE_DEF:
+        statement = BrewinWhileStatement(int_base, statement[1:],fields)
+
     return statement
 
 class BrewinBeginStatement:
@@ -196,6 +198,22 @@ class BrewinBeginStatement:
         for statement in args:
             evaluate_expression(self.int_base,statement,self.fields)
         
+class BrewinWhileStatement:
+    def __init__(self, int_base, args,fields):
+        self.int_base = int_base
+        self.args = args
+        self.fields = fields
+        self.__execute_while_statement(args)
+
+    def __execute_while_statement(self,args):
+        condition = evaluate_expression(self.int_base,args[0],self.fields)
+        if condition != self.int_base.TRUE_DEF and condition != self.int_base.FALSE_DEF:
+            self.int_base.error(ErrorType.TYPE_ERROR)
+        while condition == self.int_base.TRUE_DEF:
+            for statement in args[1:]:
+                evaluate_expression(self.int_base,statement,self.fields)
+            condition = evaluate_expression(self.int_base,args[0],self.fields)
+
 class BrewinInputiStatement:
     def __init__(self, int_base, args,fields):
         self.int_base = int_base
@@ -222,7 +240,11 @@ class BrewinSetStatement:
         if args[0] not in self.fields:
             self.int_base.error(ErrorType.NAME_ERROR)
         else:
-            self.fields[args[0]] = create_value(self.int_base,args[1])
+            if isinstance(args[1],list):
+                val = evaluate_expression(self.int_base,args[1],self.fields)
+                self.fields[args[0]] = create_value(self.int_base,val)
+            else:
+                self.fields[args[0]] = create_value(self.int_base,args[1])
 
 class BrewinIfStatement:
     def __init__(self, int_base, args,fields):
@@ -242,18 +264,7 @@ class BrewinIfStatement:
             if len(args) > 2:
                 statement = args[2]
                 status = evaluate_expression(self.int_base,statement,self.fields)
-        #print(status)
-
-class GlobalPrint:
-    def __init__(self, int_base):
-        self.int_base = int_base
-        self.return_string = ""
-    
-    def add_to_return_string(self, string):
-        self.return_string += string
-    
-    def __execute_print(self):
-        self.int_base.output(self.return_string)
+        
 
 class BrewinPrintStatement:
     def __init__(self, int_base,args,fields):
@@ -298,7 +309,7 @@ def evaluate_expression(int_base,expression_list,fields):
    
     if (expression_list[0] == int_base.PRINT_DEF or expression_list[0] == int_base.BEGIN_DEF or expression_list[0] == int_base.IF_DEF 
         or expression_list[0] == int_base.INPUT_INT_DEF or expression_list[0] == int_base.INPUT_STRING_DEF or 
-        expression_list[0] == int_base.SET_DEF):
+        expression_list[0] == int_base.SET_DEF or expression_list[0] == int_base.WHILE_DEF):
         statement_caller(int_base, expression_list,fields)
         return 
     

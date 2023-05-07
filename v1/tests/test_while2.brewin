@@ -1,0 +1,16 @@
+(class main
+         (field x 29)
+         (method main ()
+           (while (> x 0) 
+             (begin
+               (if (== 0 (% x 2))
+                 (begin 
+                   (print "EVEN X " x)
+                   (set x (- x 1))
+                 )
+                 (set x (- x 1))
+               )
+             ) 
+           )  
+   )
+)
