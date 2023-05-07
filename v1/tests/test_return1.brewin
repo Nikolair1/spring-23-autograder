@@ -1,7 +1,11 @@
 (class main
+        (field x 5)
          (method foo (q) 
            (return (* 3 q)))   # returns the value of 3*q
          (method main () 
-           (print (call me foo 5))
+            (begin
+                (print (call me foo 5))
+                (print x)
+            )
          )
       )

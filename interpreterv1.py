@@ -7,6 +7,7 @@ import re
 import copy
 
 parsed_program = None
+output_var = None
 
 class Interpreter(InterpreterBase):
     def __init__(self, console_output=True, inp=None, trace_output=False):
@@ -347,6 +348,7 @@ class BrewinPrintStatement:
         return self.return_string
     
     def __execute_print(self,args):
+        global output_var
         return_string = ""
         #print(args)
         if args[0] == '""':
@@ -360,10 +362,14 @@ class BrewinPrintStatement:
                     argument = str(self.fields[argument].value())
     
                 #print(f"ARGUMENT IS {argument}")
-            pattern = r'^"(?![^"]*"\')([^"]*)"$'
+           
 
             if isinstance(argument,list):
+                print("calling call here")
                 res = evaluate_expression(self.int_base,argument,self.fields,self.params)
+                if isinstance(res, BrewinCallStatement):
+                    res = output_var
+                print("res is",res)
                 return_string += str(res)
             elif argument.lstrip('-').isdigit():
                 return_string += argument
@@ -391,6 +397,7 @@ class BrewinCallStatement:
 
     def __execute_call_statement(self,args):
         global parsed_program
+        global output_var
         #print("What's up")
         #print(parsed_program)
         func_name = args[1]
@@ -421,6 +428,9 @@ class BrewinCallStatement:
             #print("updated param: ",x,y.value())
         #print(func_name,func_args,self.statement,self.params)
         result = statement_caller(self.int_base,self.statement,self.fields,self.params)
+        print("result from call IS ",result)
+        if isinstance(result, BrewinReturnStatement):
+            return output_var
         return result
 
 class BrewinReturnStatement:
@@ -429,11 +439,21 @@ class BrewinReturnStatement:
         self.args = args
         self.fields = fields
         self.params = params
-        self.__execute_return_statement(args)
+        self.output = None
+        self.__execute_return_statement()
 
-    def __execute_return_statement(self,args):
+    def output(self):
+        return self.output
+    
+    def __execute_return_statement(self):
+        global output_var
         print("heyo")
-
+        print(self.args)
+        z = evaluate_expression(self.int_base,self.args[0],self.fields,self.params)
+        print(z)
+        self.output = z
+        output_var = z
+        return z
 
 
 
@@ -444,10 +464,6 @@ def evaluate_expression(int_base,expression_list,fields,params):
             expression_list =  str(get_value(params,expression_list).value())
         elif expression_list in fields:
             expression_list =  str(fields[expression_list].value())
-
-        
-        
-            #print("EXPRESSION LIST IS", expression_list)
 
     if isinstance(expression_list, str):  # base case: if the expression_list is a string, return it as an integer
         try:
@@ -461,6 +477,9 @@ def evaluate_expression(int_base,expression_list,fields,params):
                     return expression_list[1:-1] 
                 return expression_list
     
+    if (expression_list[0] == int_base.RETURN_DEF) or expression_list[0] == int_base.CALL_DEF:
+        return statement_caller(int_base, expression_list,fields,params)
+
     if (expression_list[0] == int_base.PRINT_DEF or expression_list[0] == int_base.BEGIN_DEF or expression_list[0] == int_base.IF_DEF 
         or expression_list[0] == int_base.INPUT_INT_DEF or expression_list[0] == int_base.INPUT_STRING_DEF or 
         expression_list[0] == int_base.SET_DEF or expression_list[0] == int_base.WHILE_DEF):
