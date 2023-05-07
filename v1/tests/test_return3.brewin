@@ -1,0 +1,8 @@
+(class main
+          (field x 3)
+         (method main ()
+           (while (> x 0)
+               (return)
+             ) 
+           )  
+   )

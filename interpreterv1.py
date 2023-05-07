@@ -8,6 +8,7 @@ import copy
 
 parsed_program = None
 output_var = None
+stop = False
 
 class Interpreter(InterpreterBase):
     def __init__(self, console_output=True, inp=None, trace_output=False):
@@ -250,10 +251,14 @@ class BrewinBeginStatement:
         self.__execute_begin_statement(args)
 
     def __execute_begin_statement(self,args):
+        global stop
         for statement in args:
-            #print("IN BEGIN")
-            #print(statement)
-            evaluate_expression(self.int_base,statement,self.fields,self.params)
+            print("IN BEGIN")
+            print(statement)
+            output = evaluate_expression(self.int_base,statement,self.fields,self.params)
+            if isinstance(output, BrewinReturnStatement):
+                stop=True
+            print("output is",output)
         
 class BrewinWhileStatement:
     def __init__(self, int_base, args,fields,params):
@@ -264,12 +269,19 @@ class BrewinWhileStatement:
         self.__execute_while_statement(args)
 
     def __execute_while_statement(self,args):
+        global stop
         condition = evaluate_expression(self.int_base,args[0],self.fields,self.params)
         if condition != self.int_base.TRUE_DEF and condition != self.int_base.FALSE_DEF:
             self.int_base.error(ErrorType.TYPE_ERROR)
-        while condition == self.int_base.TRUE_DEF:
+        print(condition)
+        while condition == self.int_base.TRUE_DEF and not stop:
+            print("i made it this far")
             for statement in args[1:]:
-                evaluate_expression(self.int_base,statement,self.fields,self.params)
+                print("calling our return statement", statement)
+                res = evaluate_expression(self.int_base,statement,self.fields,self.params)
+                print("res is a ", res)
+                if isinstance(res, BrewinReturnStatement):
+                    return output_var
             condition = evaluate_expression(self.int_base,args[0],self.fields,self.params)
 
 class BrewinInputiStatement:
@@ -350,7 +362,6 @@ class BrewinPrintStatement:
     def __execute_print(self,args):
         global output_var
         return_string = ""
-        #print(args)
         if args[0] == '""':
             return
         for argument in args:
@@ -400,6 +411,7 @@ class BrewinCallStatement:
         global output_var
         #print("What's up")
         #print(parsed_program)
+        func_obj = args[0]
         func_name = args[1]
         func_args = args[2:]
         for class_def in parsed_program:
@@ -426,7 +438,7 @@ class BrewinCallStatement:
 
         #for (x,y) in self.params:
             #print("updated param: ",x,y.value())
-        #print(func_name,func_args,self.statement,self.params)
+        print(func_obj,func_name,func_args,self.statement,self.params)
         result = statement_caller(self.int_base,self.statement,self.fields,self.params)
         print("result from call IS ",result)
         if isinstance(result, BrewinReturnStatement):
@@ -447,13 +459,20 @@ class BrewinReturnStatement:
     
     def __execute_return_statement(self):
         global output_var
+        global stop
         print("heyo")
-        print(self.args)
-        z = evaluate_expression(self.int_base,self.args[0],self.fields,self.params)
-        print(z)
-        self.output = z
-        output_var = z
-        return z
+        #print(self.args)
+        
+        if len(self.args)>0:
+            z = evaluate_expression(self.int_base,self.args[0],self.fields,self.params)
+            print(z)
+            self.output = z
+            output_var = z
+            #stop=True
+            return z
+        #stop=True
+        output_var = ""
+        return ""
 
 
 
@@ -483,8 +502,7 @@ def evaluate_expression(int_base,expression_list,fields,params):
     if (expression_list[0] == int_base.PRINT_DEF or expression_list[0] == int_base.BEGIN_DEF or expression_list[0] == int_base.IF_DEF 
         or expression_list[0] == int_base.INPUT_INT_DEF or expression_list[0] == int_base.INPUT_STRING_DEF or 
         expression_list[0] == int_base.SET_DEF or expression_list[0] == int_base.WHILE_DEF):
-        statement_caller(int_base, expression_list,fields,params)
-        return 
+        return statement_caller(int_base, expression_list,fields,params)
     
     
     

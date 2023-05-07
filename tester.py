@@ -124,7 +124,7 @@ def generate_test_suite_v1():
         1,
         ["test_method1","test_while1","test_while2","test_set_field","test_set_field1","test_inputi","test_field1","test_field2","test_field3","test_field4","test_begin1",
          "test_begin2","test_begin3","test_if1","test_if2","test_if3","test_print1","test_print2","test_print3", "test_print4", 
-         "test_print5", "test_print6", "test_print7","test_null1","test_method3","test_return1"],
+         "test_print5", "test_print6", "test_print7","test_null1","test_method3","test_return1","test_bool1","test_return2","test_return3"],
         ["test_method1","test_method2","test_null1","test_main_method","test_incompat_operands1","test_if","test_print1", "test_print2", "test_print3", "test_print4"],
     )
 
