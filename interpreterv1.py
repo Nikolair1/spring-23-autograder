@@ -402,6 +402,20 @@ class BrewinCallStatement:
         global output_var
         #print("What's up")
         #print(parsed_program)
+        func_caller = args[0]
+        print("first")
+        print(func_caller)
+        print(self.params)
+        
+        if func_caller in self.fields:
+            y = self.fields[func_caller].value()
+            func_caller = y
+
+        if func_caller == self.int_base.ME_DEF:
+            pass
+        elif func_caller == self.int_base.NULL_DEF:
+            self.int_base.error(ErrorType.FAULT_ERROR)
+
         func_name = args[1]
         func_args = args[2:]
         for class_def in parsed_program:
@@ -426,9 +440,11 @@ class BrewinCallStatement:
             else:
                 set_param_value(self.params,self.params[i][0],create_value(self.int_base,func_args[i]))
 
-        #for (x,y) in self.params:
-            #print("updated param: ",x,y.value())
-        #print(func_name,func_args,self.statement,self.params)
+        for (x,y) in self.params:
+            print("updated param: ",x,y.value())
+        
+
+
         result = statement_caller(self.int_base,self.statement,self.fields,self.params)
         print("result from call IS ",result)
         if isinstance(result, BrewinReturnStatement):
