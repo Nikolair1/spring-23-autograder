@@ -1,0 +1,6 @@
+(class main
+          (field x 0)
+         (method main () 
+            (if (== 3 (+ x 3)) (print x) (print "this won't print"))
+   )
+)

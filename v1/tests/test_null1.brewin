@@ -1,0 +1,9 @@
+(class main
+        (field x 0)
+        (method main (y) 
+        (begin
+          (set y (+ "hello " "world"))
+          (if (== y "hello world") (print "true") (print "false"))
+          (print y)
+        ))
+      )

@@ -1,0 +1,8 @@
+(class main
+ (field x "69")
+ (method main ()
+  (begin
+   (print x)
+  )
+ )
+)

@@ -120,61 +120,13 @@ def __generate_test_suite(version, successes, failures):
 
 def generate_test_suite_v1():
     """wrapper for generate_test_suite for v1"""
-    tests = [
-        "test_begin1",
-        "test_begin2",
-        "test_bool_expr",
-        "test_compare_bool",
-        "test_compare_int",
-        "test_compare_null",
-        "test_compare_string",
-        "test_fields",
-        "test_function_call_same_class",
-        "test_fwd_call",
-        "test_if",
-        "test_inputi",
-        "test_inputs",
-        "test_instantiate_and_call1",
-        "test_instantiate_and_call2",
-        "test_instantiate_and_return1",
-        "test_instantiate_and_return2",
-        "test_int_ops",
-        "test_nested_calls",
-        "test_nothing",
-        "test_pass_by_value",
-        "test_print_bool",
-        "test_print_combo",
-        "test_print_int",
-        "test_print_string",
-        "test_recursion1",
-        "test_recursion2",
-        "test_return",
-        "test_return_exit",
-        "test_return_type",
-        "test_set_field",
-        "test_set_param",
-        "test_str_ops",
-        "test_while",
-    ]
-    fails = [
-        "test_call_badargs",
-        "test_call_invalid_func",
-        "test_dup_class",
-        "test_dup_field",
-        "test_dup_method",
-        "test_eval_invalid_var",
-        "test_if",
-        "test_incompat_operands1",
-        "test_incompat_operands2",
-        "test_incompat_operands3",
-        "test_incompat_operands4",
-        "test_instantiate_invalid",
-        "test_null_objref",
-        "test_return_nothing",
-        "test_set_invalid_var",
-        "test_while",
-    ]
-    return __generate_test_suite(1, tests, fails)
+    return __generate_test_suite(
+        1,
+        ["test_return1","test_method1","test_while1","test_while2","test_set_field","test_set_field1","test_inputi","test_field1","test_field2","test_field3","test_field4","test_begin1",
+         "test_begin2","test_begin3","test_if1","test_if2","test_if3","test_print1","test_print2","test_print3", "test_print4", 
+         "test_print5", "test_print6", "test_print7","test_null1","test_method3","test_return1","test_bool1","test_recursion1"],
+        ["test_null_ref","test_method1","test_method2","test_null1","test_main_method","test_incompat_operands1","test_if","test_print1", "test_print2", "test_print3", "test_print4"],
+    )
 
 
 def generate_test_suite_v2():

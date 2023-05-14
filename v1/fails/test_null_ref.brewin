@@ -1,0 +1,18 @@
+(class person
+   (field name "")
+   (field age 0)
+   (method init (n a) (begin (set name n) (set age a)))
+   (method talk (to_whom) (print name " says hello to " to_whom))
+)
+
+	(class main
+        (field x null)
+        (method foo (q)
+          (begin	
+           (call x talk "apple")	 
+          )
+        )
+        (method main () 
+          (call me foo null)
+  )
+)

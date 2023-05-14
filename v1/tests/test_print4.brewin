@@ -1,0 +1,5 @@
+(class main
+         (method main () 
+            (print -12345678901234 "hi" 232323 true false)
+   )
+)

@@ -1,0 +1,13 @@
+(class main
+        (method main () 
+          (begin
+            (if true
+              (if (== 8 (+ 3 5))
+              (begin
+              (print "made it :D")
+              (print "another"))
+              )
+            )
+          )
+  )
+)
