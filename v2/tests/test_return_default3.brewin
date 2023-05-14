@@ -1,0 +1,17 @@
+(class main
+  (field int x 0)
+  (field string s "Nikolai")
+  (field main q null)
+  (method int q () (print "zxz"))
+  (method string p () (print "xzx"))
+  (method main cool_func () (print "yo"))
+  (method int main () 
+    (begin 
+      (print x)
+      (print s)
+      (print (call me q))
+      (print (== (call me p) ""))
+      (print (call me cool_func))
+    )
+  )
+)

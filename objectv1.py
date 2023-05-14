@@ -15,9 +15,10 @@ class ObjectDef:
     STATUS_NAME_ERROR = 2
     STATUS_TYPE_ERROR = 3
 
-    def __init__(self, interpreter, class_def, trace_output):
+    def __init__(self, interpreter, class_def, trace_output,classes_defined_set):
         self.interpreter = interpreter  # objref to interpreter object. used to report errors, get input, produce output
         self.class_def = class_def  # take class body from 3rd+ list elements, e.g., ["class",classname", [classbody]]
+        self.classes_defined_set = classes_defined_set
         self.trace_output = trace_output
         self.__map_fields_to_values()
         self.__map_method_names_to_method_definitions()
@@ -56,10 +57,14 @@ class ObjectDef:
         status, return_value = self.__execute_statement(env, method_info.code)
         # if the method explicitly used the (return expression) statement to return a value, then return that
         # value back to the caller
+        print("my return type is: ", method_info.return_type)
         if status == ObjectDef.STATUS_RETURN:
+            #TODO Now validate that return value is right type
             return return_value
-        # The method didn't explicitly return a value, so return a value of type nothing
-        return Value(InterpreterBase.NOTHING_DEF)
+       
+        
+        default_val = self.default_return_selector(method_info.return_type)
+        return default_val
 
     def call_params_checker(self,formal_params,actual_params):
         for i,params in enumerate(formal_params):
@@ -69,7 +74,22 @@ class ObjectDef:
                 print("passed class check :D")
             elif formal_params[i].type() != actual_params[i].type():
                 return self.interpreter.error(ErrorType.TYPE_ERROR)
+            
+    def return_type_checker(self,return_type, return_value):
+        print("hi")
 
+    def default_return_selector(self,return_type):
+        if return_type == InterpreterBase.INT_DEF:
+            return Value(Type.INT,0)
+        elif return_type == InterpreterBase.BOOL_DEF:
+            return Value(Type.BOOL,False)
+        elif return_type == InterpreterBase.STRING_DEF:
+            return Value(Type.STRING,"")
+        elif return_type in self.classes_defined_set or return_type == InterpreterBase.VOID_DEF:
+            return Value(Type.NOTHING)
+        else:
+            return self.interpreter.error(ErrorType.TYPE_ERROR,"return type does not exist ")
+       
     def __execute_statement(self, env, code):
         """
         returns (status_code, return_value) where:

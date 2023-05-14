@@ -24,6 +24,9 @@ class MethodDef:
         self.formal_params = validate_method_init(method_def[3],class_set,interpreter) #handles type checking of initial method values
         self.code = method_def[4]
     
+    def get_return_type(self):
+        return self.return_type
+    
 
 class FieldDef:
     """

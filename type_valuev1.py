@@ -64,7 +64,6 @@ def validate_field_init(val, type, class_set,interpreter):
 
 
 def validate_method_init(vals,class_set,interpreter):
-    print('in validate_method_init',vals)
     formal_params = []
     for val in vals:
             type = val[0]
@@ -79,7 +78,6 @@ def validate_method_init(vals,class_set,interpreter):
                 formal_params.append(Value(Type.CLASS, value=name, class_name=type))
             else: 
                 interpreter.error(ErrorType.TYPE_ERROR, "invalid formal param type ")
-    print("exiting validate_method_init",formal_params)
     return formal_params
 
 

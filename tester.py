@@ -135,7 +135,7 @@ def generate_test_suite_v2():
     return __generate_test_suite(
         2,
         [
-            "types_in_fields_and_params", "types_in_params"
+            "types_in_fields_and_params", "types_in_params", "test_return_default3"
         ],
         [
             "types_incompat_params","types_incompat_fields"

@@ -19,6 +19,7 @@ class Interpreter(InterpreterBase):
         self.trace_output = trace_output
         self.main_object = None
         self.class_index = {}
+        self.classes_defined_set = set()
 
     def run(self, program):
         """
@@ -60,13 +61,13 @@ class Interpreter(InterpreterBase):
             )
         class_def = self.class_index[class_name]
         obj = ObjectDef(
-            self, class_def, self.trace_output
+            self, class_def, self.trace_output, self.classes_defined_set
         )  # Create an object based on this class definition
         return obj
 
     def __map_class_names_to_class_defs(self, program):
         self.class_index = {}
-        classes_defined_set = set()
+        self.classes_defined_set = set()
         for item in program:
             if item[0] == InterpreterBase.CLASS_DEF:
                 if item[1] in self.class_index:
@@ -75,6 +76,6 @@ class Interpreter(InterpreterBase):
                         f"Duplicate class name {item[1]}",
                         item[0].line_num,
                     )
-                classes_defined_set.add(item[1])
-                self.class_index[item[1]] = ClassDef(item, self, classes_defined_set) #now passing in class index so the class knows what 
+                self.classes_defined_set.add(item[1])
+                self.class_index[item[1]] = ClassDef(item, self, self.classes_defined_set) #now passing in class index so the class knows what 
                                                                                   #other classes have been defined thus far
