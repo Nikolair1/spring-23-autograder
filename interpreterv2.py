@@ -14,7 +14,7 @@ class Interpreter(InterpreterBase):
     Main interpreter class that subclasses InterpreterBase.
     """
 
-    def __init__(self, console_output=True, inp=None, trace_output=False):
+    def __init__(self, console_output=True, inp=None, trace_output=True):
         super().__init__(console_output, inp)
         self.trace_output = trace_output
         self.main_object = None
@@ -31,7 +31,8 @@ class Interpreter(InterpreterBase):
                 ErrorType.SYNTAX_ERROR, f"Parse error on program: {parsed_program}"
             )
         self.__map_class_names_to_class_defs(parsed_program)
-
+        
+    
         # instantiate main class
         invalid_line_num_of_caller = None
         self.main_object = self.instantiate(
@@ -65,6 +66,7 @@ class Interpreter(InterpreterBase):
 
     def __map_class_names_to_class_defs(self, program):
         self.class_index = {}
+        classes_defined_set = set()
         for item in program:
             if item[0] == InterpreterBase.CLASS_DEF:
                 if item[1] in self.class_index:
@@ -73,4 +75,6 @@ class Interpreter(InterpreterBase):
                         f"Duplicate class name {item[1]}",
                         item[0].line_num,
                     )
-                self.class_index[item[1]] = ClassDef(item, self)
+                classes_defined_set.add(item[1])
+                self.class_index[item[1]] = ClassDef(item, self, classes_defined_set) #now passing in class index so the class knows what 
+                                                                                  #other classes have been defined thus far

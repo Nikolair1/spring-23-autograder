@@ -1,0 +1,11 @@
+(class main
+  (field int x 10)
+  (field string s "Nikolai")
+  (field main q null)
+  (method void main () 
+    (begin 
+      (print x)
+      (print s)
+    )
+  )
+)

@@ -179,16 +179,21 @@ def generate_test_suite_v1():
 
 def generate_test_suite_v2():
     """wrapper for generate_test_suite for v2"""
+    
     return __generate_test_suite(
         2,
         [
-            "test_compare_null",
-            "test_return_default1",
-            "test_inher2",
-            "test_inher1",
-            "test_let",
+            "types_in_fields_and_params", "types_in_params"
         ],
-        ["test_incompat_return1", "test_let2", "test_inher1", "test_incompat_types2"],
+        [
+            "types_incompat_params","types_incompat_fields"
+        ],
+        #"test_compare_null",
+         #   "test_return_default1",
+            #"test_inher2",
+           # "test_inher1",
+           # "test_let", 
+        #["test_incompat_return1", "test_let2", "test_inher1", "test_incompat_types2"]
     )
 
 

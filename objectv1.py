@@ -46,8 +46,12 @@ class ObjectDef:
         env = (
             EnvironmentManager()
         )  # maintains lexical environment for function; just params for now
+        
+        #need to validate called types
+        self.call_params_checker(method_info.formal_params,actual_params)
+        
         for formal, actual in zip(method_info.formal_params, actual_params):
-            env.set(formal, actual)
+            env.set(formal.value(), actual)
         # since each method has a single top-level statement, execute it.
         status, return_value = self.__execute_statement(env, method_info.code)
         # if the method explicitly used the (return expression) statement to return a value, then return that
@@ -56,6 +60,15 @@ class ObjectDef:
             return return_value
         # The method didn't explicitly return a value, so return a value of type nothing
         return Value(InterpreterBase.NOTHING_DEF)
+
+    def call_params_checker(self,formal_params,actual_params):
+        for i,params in enumerate(formal_params):
+            if formal_params[i].type() == Type.CLASS:
+                if formal_params[i].class_name() != actual_params[i].type():
+                    return self.interpreter.error(ErrorType.TYPE_ERROR)
+                print("passed class check :D")
+            elif formal_params[i].type() != actual_params[i].type():
+                return self.interpreter.error(ErrorType.TYPE_ERROR)
 
     def __execute_statement(self, env, code):
         """
@@ -219,15 +232,17 @@ class ObjectDef:
     # expressions could be: constants (true, 5, "blah"), variables (e.g., x), arithmetic/string/logical expressions
     # like (+ 5 6), (+ "abc" "def"), (> a 5), method calls (e.g., (call me foo)), or instantiations (e.g., new dog_class)
     def __evaluate_expression(self, env, expr, line_num_of_statement):
+    
         if not isinstance(expr, list):
             # locals shadow member variables
+            
             val = env.get(expr)
             if val is not None:
                 return val
             if expr in self.fields:
                 return self.fields[expr]
             # need to check for variable name and get its value too
-            value = create_value(expr)
+            value = create_value(expr,"val")
             if value is not None:
                 return value
             self.interpreter.error(
@@ -332,7 +347,7 @@ class ObjectDef:
     def __map_fields_to_values(self):
         self.fields = {}
         for field in self.class_def.get_fields():
-            self.fields[field.field_name] = create_value(field.default_field_value)
+            self.fields[field.field_name] = create_value(field.default_field_value,field.type)
 
     def __create_map_of_operations_to_lambdas(self):
         self.binary_op_list = [
