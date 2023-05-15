@@ -135,10 +135,13 @@ def generate_test_suite_v2():
     return __generate_test_suite(
         2,
         [
-            "types_in_fields_and_params", "types_in_params", "test_return_default3"
+            "types_in_fields_and_params", "types_in_params", "test_return_default1","test_return_default3","test_compare_null",
+            "types_in_params2", "test_compare_obj","test_assign_return"
         ],
         [
-            "types_incompat_params","types_incompat_fields"
+            "test_incompat_return1","types_incompat_params","types_incompat_fields","test_incompat_types2", 
+            "test_dup_formal_params","test_bad_return_type","test_bad_return_type2" ,"test_bad_args","test_bad_args2",
+            "test_bad_compare"
         ],
         #"test_compare_null",
          #   "test_return_default1",

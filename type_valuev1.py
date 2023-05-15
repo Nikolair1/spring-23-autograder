@@ -57,7 +57,8 @@ def validate_field_init(val, type, class_set,interpreter):
         
         if type in class_set:
             if val == InterpreterBase.NULL_DEF:
-                return Value(Type.CLASS, value=None, class_name=type)
+                x = Value(Type.CLASS, value=None, class_name=type)
+                return x
             interpreter.error(ErrorType.TYPE_ERROR, "must initialize a class type to null ")
 
         return interpreter.error(ErrorType.TYPE_ERROR, "invalid field type ")
@@ -65,9 +66,13 @@ def validate_field_init(val, type, class_set,interpreter):
 
 def validate_method_init(vals,class_set,interpreter):
     formal_params = []
+    name_set = set()
     for val in vals:
             type = val[0]
             name = val[1]
+            if name in name_set:
+                interpreter.error(ErrorType.NAME_ERROR, "duplicate formal params ")
+            name_set.add(name)
             if type == InterpreterBase.BOOL_DEF:
                 formal_params.append(Value(Type.BOOL, name))
             elif type == InterpreterBase.STRING_DEF:

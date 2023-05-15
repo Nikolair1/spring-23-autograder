@@ -57,11 +57,17 @@ class ObjectDef:
         status, return_value = self.__execute_statement(env, method_info.code)
         # if the method explicitly used the (return expression) statement to return a value, then return that
         # value back to the caller
-        print("my return type is: ", method_info.return_type)
+        #print("my return type is: ", method_info.return_type)
         if status == ObjectDef.STATUS_RETURN:
-            #TODO Now validate that return value is right type
+            #return blank case          
+            if method_info.return_type == InterpreterBase.VOID_DEF and return_value.type() != Type.NOTHING:
+                return self.interpreter.error(ErrorType.TYPE_ERROR, "void must return nothing ")
+
+            if return_value.value() == None and method_info.return_type != InterpreterBase.VOID_DEF:
+                return_value = self.default_return_selector(method_info.return_type)
+
+            self.return_type_checker(method_info.return_type,return_value)
             return return_value
-       
         
         default_val = self.default_return_selector(method_info.return_type)
         return default_val
@@ -69,14 +75,24 @@ class ObjectDef:
     def call_params_checker(self,formal_params,actual_params):
         for i,params in enumerate(formal_params):
             if formal_params[i].type() == Type.CLASS:
-                if formal_params[i].class_name() != actual_params[i].type():
-                    return self.interpreter.error(ErrorType.TYPE_ERROR)
-                print("passed class check :D")
+                if formal_params[i].class_name() != actual_params[i].class_name():
+                    return self.interpreter.error(ErrorType.NAME_ERROR)
             elif formal_params[i].type() != actual_params[i].type():
-                return self.interpreter.error(ErrorType.TYPE_ERROR)
+                return self.interpreter.error(ErrorType.NAME_ERROR)
             
-    def return_type_checker(self,return_type, return_value):
-        print("hi")
+    def return_type_checker(self, return_type, return_value):
+        if return_type == InterpreterBase.VOID_DEF and return_value.value() != None:
+            return self.interpreter.error(ErrorType.TYPE_ERROR)
+        elif return_type == InterpreterBase.STRING_DEF and return_value.type() != Type.STRING:
+            return self.interpreter.error(ErrorType.TYPE_ERROR)
+        elif return_type == InterpreterBase.INT_DEF and return_value.type() != Type.INT:
+            return self.interpreter.error(ErrorType.TYPE_ERROR)
+        elif return_type == InterpreterBase.BOOL_DEF and return_value.type() != Type.BOOL:
+            return self.interpreter.error(ErrorType.TYPE_ERROR)
+        elif return_type in self.classes_defined_set and (return_value.type() != Type.NOTHING 
+            and (return_value.type() != Type.CLASS or return_value.class_name != return_type)):
+            return self.interpreter.error(ErrorType.TYPE_ERROR,"bad class return value ")
+        
 
     def default_return_selector(self,return_type):
         if return_type == InterpreterBase.INT_DEF:
@@ -190,12 +206,14 @@ class ObjectDef:
     # member fields
     def __set_variable_aux(self, env, var_name, value, line_num):
         # parameter shadows fields
+        #print("set variable args", var_name, value, env.get(var_name),self.fields)
         if value.type() == Type.NOTHING:
             self.interpreter.error(
                 ErrorType.TYPE_ERROR, "can't assign to nothing " + var_name, line_num
             )
         param_val = env.get(var_name)
         if param_val is not None:
+            self.__set_type_check(param_val,value)
             env.set(var_name, value)
             return
 
@@ -203,7 +221,23 @@ class ObjectDef:
             self.interpreter.error(
                 ErrorType.NAME_ERROR, "unknown variable " + var_name, line_num
             )
+        
+        self.__set_type_check(self.fields[var_name], value)
         self.fields[var_name] = value
+
+    def __set_type_check(self, variable, value):
+        if value.value() == None and variable.type() == Type.CLASS:
+            pass
+        elif variable.type() == Type.CLASS:
+            if value.type() != Type.CLASS:
+                return self.interpreter.error(ErrorType.TYPE_ERROR, "have to assign class x to class x ")
+            else:
+                #print(variable.class_name(),value.class_name())
+                if variable.class_name() != value.class_name():
+                    return self.interpreter.error(ErrorType.TYPE_ERROR, "have to assign class x to class x ")
+        elif variable.type() != value.type():
+            return self.interpreter.error(ErrorType.TYPE_ERROR, "have to assign primitive x to primitive x ")
+        #TODO have to allow classes to be assigned if are derived
 
     # (if expression (statement) (statement) ) where expresion could be a boolean constant (e.g., true), member
     # variable without ()s, or a boolean expression in parens, like (> 5 a)
@@ -299,7 +333,17 @@ class ObjectDef:
                         line_num_of_statement,
                     )
                 return self.binary_ops[Type.BOOL][operator](operand1, operand2)
+            
             if operand1.type() == operand2.type() and operand1.type() == Type.CLASS:
+                #TODO support derive check here as well
+                if operand1.class_name() != None and operand2.class_name() != None:
+                    if operand1.class_name() != operand2.class_name():
+                        return self.interpreter.error(
+                        ErrorType.TYPE_ERROR,
+                        "invalid operator applied to class",
+                        line_num_of_statement,
+                    )
+
                 if operator not in self.binary_ops[Type.CLASS]:
                     self.interpreter.error(
                         ErrorType.TYPE_ERROR,
@@ -334,7 +378,7 @@ class ObjectDef:
     # (new classname)
     def __execute_new_aux(self, _, code, line_num_of_statement):
         obj = self.interpreter.instantiate(code[1], line_num_of_statement)
-        return Value(Type.CLASS, obj)
+        return Value(Type.CLASS, obj,class_name=code[1])
 
     # this method is a helper used by call statements and call expressions
     # (call object_ref/me methodname p1 p2 p3)
@@ -367,7 +411,7 @@ class ObjectDef:
     def __map_fields_to_values(self):
         self.fields = {}
         for field in self.class_def.get_fields():
-            self.fields[field.field_name] = create_value(field.default_field_value,field.type)
+            self.fields[field.field_name] = field.field_value
 
     def __create_map_of_operations_to_lambdas(self):
         self.binary_op_list = [

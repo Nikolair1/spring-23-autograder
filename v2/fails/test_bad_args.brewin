@@ -1,0 +1,7 @@
+(class main
+  (field bool q true)
+  (method void foo ((int x)) (print x))
+  (method void main ()
+    (call me foo q)
+  )
+)

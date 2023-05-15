@@ -1,6 +1,6 @@
 (class main
- (method main i () (return null))
- (method string s () (return))
+ (method int i () (return))
+ (method cap s () (return null))
  (method bool b () (return))
  (method void main ()
    (begin

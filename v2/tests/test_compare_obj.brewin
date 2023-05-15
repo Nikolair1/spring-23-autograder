@@ -1,0 +1,21 @@
+(class person
+         (field string name "")
+         (field int age 0)
+         (method void talk ()
+            (print "oh")
+         )
+      )
+(class main
+ (field person x null)
+ (field person y null)
+ (method void main ()
+   (begin
+      (set x (new person))
+      (set y (new person))
+      (print (== y null))
+      (set y null)
+      (print (== y null))
+      (print "HI")
+   )
+ )
+)

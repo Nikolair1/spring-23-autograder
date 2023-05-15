@@ -1,8 +1,8 @@
 (class main
 (field int x 0)
-(method void foo ((int param1) (int param2)) 
+(method void foo ((int param1) (int param1)) 
   (begin
-    (set x param2)
+    (set x param1)
     (print param1)
   )   
 )
