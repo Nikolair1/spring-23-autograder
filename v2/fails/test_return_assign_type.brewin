@@ -1,0 +1,10 @@
+(class main
+    (field string q "jane")
+    (method int returns_int () (return 5))
+    (method void main()
+        (begin
+        (set q (call me returns_int))
+        (print q)
+        )
+    )
+)

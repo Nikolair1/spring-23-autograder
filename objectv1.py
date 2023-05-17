@@ -452,6 +452,13 @@ class ObjectDef:
         obj_name = code[1]
         if obj_name == InterpreterBase.ME_DEF:
             obj = self
+        elif obj_name == InterpreterBase.SUPER_DEF:
+            obj = self.parent_obj
+            if obj is None:
+                self.interpreter.error(
+                ErrorType.NAME_ERROR, "method does not exist in parent ", line_num_of_statement
+            )
+            obj = obj.value()
         else:
             obj = self.__evaluate_expression(
                 env, obj_name, line_num_of_statement
