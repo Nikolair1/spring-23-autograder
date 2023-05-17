@@ -55,10 +55,17 @@ class ClassDef:
         self.interpreter = interpreter
         self.name = class_def[1]
         self.class_set = class_set
-        self.__create_field_list(class_def[2:], self.class_set)
-        self.__create_method_list(class_def[2:],self.class_set)
+        self.parent_reference = None
+        self.data_index = self.__check_inheritance(class_def)
+        self.__create_field_list(class_def[self.data_index:], self.class_set)
+        self.__create_method_list(class_def[self.data_index:],self.class_set)
         
+    def get_name(self):
+        return self.name
 
+    def get_parent_ref(self):
+        return self.parent_reference
+    
     def get_fields(self):
         """
         Get a list of FieldDefs for *all* fields in the class.
@@ -70,6 +77,16 @@ class ClassDef:
         Get a list of MethodDefs for *all* fields in the class.
         """
         return self.methods
+
+    def __check_inheritance(self,class_def):
+        if not isinstance(class_def[2],list):
+            if class_def[2] == InterpreterBase.INHERITS_DEF:
+                parent = class_def[3]
+                obj = self.interpreter.instantiate(parent,None)
+                self.parent_reference = Value(Type.CLASS, obj,class_name=parent)
+                return 4
+        else:
+            return 2
 
     def __create_field_list(self, class_body,class_set):
         #print("class_body variable: ",class_body)

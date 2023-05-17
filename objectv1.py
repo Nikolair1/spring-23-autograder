@@ -19,6 +19,8 @@ class ObjectDef:
         self.interpreter = interpreter  # objref to interpreter object. used to report errors, get input, produce output
         self.class_def = class_def  # take class body from 3rd+ list elements, e.g., ["class",classname", [classbody]]
         self.classes_defined_set = classes_defined_set
+        self.parent_obj = class_def.get_parent_ref()
+        #print(f"{class_def.get_name()}'s parent obj is {self.parent_obj}")
         self.trace_output = trace_output
         self.__map_fields_to_values()
         self.__map_method_names_to_method_definitions()
@@ -32,11 +34,16 @@ class ObjectDef:
         The error is then generated at the source (i.e., where the call is initiated).
         """
         if method_name not in self.methods:
-            self.interpreter.error(
-                ErrorType.NAME_ERROR,
-                "unknown method " + method_name,
-                line_num_of_caller,
-            )
+            #now we should check the parent
+            if self.parent_obj is not None:
+                parent = self.parent_obj.value()
+                return parent.call_method(method_name,actual_params,line_num_of_caller)
+            else:
+                self.interpreter.error(
+                    ErrorType.NAME_ERROR,
+                    "unknown method " + method_name,
+                    line_num_of_caller,
+                )
         method_info = self.methods[method_name]
         if len(actual_params) != len(method_info.formal_params):
             self.interpreter.error(
@@ -44,15 +51,13 @@ class ObjectDef:
                 "invalid number of parameters in call to " + method_name,
                 line_num_of_caller,
             )
-        env = (
-            EnvironmentManager()
-        )  # maintains lexical environment for function; just params for now
+        env = [EnvironmentManager()]  # maintains lexical environment for function as stack of environments; just params for now
         
         #need to validate called types
         self.call_params_checker(method_info.formal_params,actual_params)
         
         for formal, actual in zip(method_info.formal_params, actual_params):
-            env.set(formal.value(), actual)
+            env[0].set(formal.value(), actual)
         # since each method has a single top-level statement, execute it.
         status, return_value = self.__execute_statement(env, method_info.code)
         # if the method explicitly used the (return expression) statement to return a value, then return that
@@ -135,6 +140,8 @@ class ObjectDef:
             return self.__execute_input(env, code, False)
         if tok == InterpreterBase.PRINT_DEF:
             return self.__execute_print(env, code)
+        if tok == InterpreterBase.LET_DEF:
+            return self.__execute_let(env,code)
 
         self.interpreter.error(
             ErrorType.SYNTAX_ERROR, "unknown statement " + tok, tok.line_num
@@ -152,6 +159,58 @@ class ObjectDef:
         # if we run thru the entire block without a return, then just return proceed
         # we don't want the calling block to exit with a return
         return ObjectDef.STATUS_PROCEED, None
+
+    def __execute_let(self, env, code):
+        new_env = (EnvironmentManager())
+        local_vars = code[1]
+        name_set = set()
+        for local_var in local_vars:
+            new_env.set(local_var[1],self.verify_declaration(local_var,name_set))
+            name_set.add(local_var[1])
+        env.append(new_env)
+
+        #now run statements
+        for statement in code[2:]:
+            status, return_value = self.__execute_statement(env, statement)
+            if status == ObjectDef.STATUS_RETURN:
+                return (
+                    status,
+                    return_value,
+                )  # could be a valid return of a value or an error
+        # if we run thru the entire block without a return, then just return proceed
+        # we don't want the calling block to exit with a return
+
+        env.pop()
+        return ObjectDef.STATUS_PROCEED, None
+    
+    def verify_declaration(self,local_var,name_set):
+        type = local_var[0]
+        name = local_var[1]
+        val = local_var[2]
+        if name in name_set:
+            return self.interpreter.error(ErrorType.NAME_ERROR, "duplicate variable names ")
+        if type == InterpreterBase.BOOL_DEF:
+            if val == InterpreterBase.TRUE_DEF:
+                return Value(Type.BOOL, True)
+            if val == InterpreterBase.FALSE_DEF:
+                return Value(Type.BOOL, False)
+            self.interpreter.error(ErrorType.TYPE_ERROR, "must create values with correct type ")
+        if type == InterpreterBase.STRING_DEF:
+            if val[0] == '"':
+                return Value(Type.STRING, val.strip('"'))
+            self.interpreter.error(ErrorType.TYPE_ERROR, "must create values with correct type ")
+        if type == InterpreterBase.INT_DEF:
+            if val.lstrip('-').isnumeric():
+                return Value(Type.INT, int(val))
+            self.interpreter.error(ErrorType.TYPE_ERROR, "must create values with correct type ")
+        if type in self.class_set:
+            if val == InterpreterBase.NULL_DEF:
+                x = Value(Type.CLASS, value=None, class_name=type)
+                return x
+            self.interpreter.error(ErrorType.TYPE_ERROR, "must initialize a class type to null ")
+
+        return self.interpreter.error(ErrorType.TYPE_ERROR, "invalid var type ")
+
 
     # (call object_ref/me methodname param1 param2 param3)
     # where params are expressions, and expresion could be a value, or a (+ ...)
@@ -211,12 +270,15 @@ class ObjectDef:
             self.interpreter.error(
                 ErrorType.TYPE_ERROR, "can't assign to nothing " + var_name, line_num
             )
-        param_val = env.get(var_name)
-        if param_val is not None:
-            self.__set_type_check(param_val,value)
-            env.set(var_name, value)
-            return
 
+        #checking all environment instances for our variable
+        for i in range(len(env)-1, -1, -1):
+            param_val = env[i].get(var_name)
+            if param_val is not None:
+                self.__set_type_check(param_val,value)
+                env[i].set(var_name, value)
+                return
+                
         if var_name not in self.fields:
             self.interpreter.error(
                 ErrorType.NAME_ERROR, "unknown variable " + var_name, line_num
@@ -289,10 +351,12 @@ class ObjectDef:
     
         if not isinstance(expr, list):
             # locals shadow member variables
-            
-            val = env.get(expr)
-            if val is not None:
-                return val
+            #searches through stack of environments
+            for i in range(len(env)-1, -1, -1):
+                val = env[i].get(expr)
+                if val is not None:
+                    return val
+                
             if expr in self.fields:
                 return self.fields[expr]
             # need to check for variable name and get its value too
@@ -378,6 +442,7 @@ class ObjectDef:
     # (new classname)
     def __execute_new_aux(self, _, code, line_num_of_statement):
         obj = self.interpreter.instantiate(code[1], line_num_of_statement)
+        #print("instantiating new class", code[1])
         return Value(Type.CLASS, obj,class_name=code[1])
 
     # this method is a helper used by call statements and call expressions
