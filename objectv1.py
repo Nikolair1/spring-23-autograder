@@ -46,16 +46,30 @@ class ObjectDef:
                 )
         method_info = self.methods[method_name]
         if len(actual_params) != len(method_info.formal_params):
-            self.interpreter.error(
-                ErrorType.TYPE_ERROR,
-                "invalid number of parameters in call to " + method_name,
-                line_num_of_caller,
-            )
+            if self.parent_obj is not None:
+                parent = self.parent_obj.value()
+                return parent.call_method(method_name,actual_params,line_num_of_caller)
+            else:
+                self.interpreter.error(
+                    ErrorType.TYPE_ERROR,
+                    "invalid number of parameters in call to " + method_name,
+                    line_num_of_caller,
+                )
         env = [EnvironmentManager()]  # maintains lexical environment for function as stack of environments; just params for now
         
         #need to validate called types
-        self.call_params_checker(method_info.formal_params,actual_params)
-        
+        error = self.call_params_checker(method_info.formal_params,actual_params)
+        if error:
+            if self.parent_obj is not None:
+                parent = self.parent_obj.value()
+                return parent.call_method(method_name,actual_params,line_num_of_caller)
+            else:
+                self.interpreter.error(
+                    ErrorType.NAME_ERROR,
+                    "incorrect param types " + method_name,
+                    line_num_of_caller,
+                )
+
         for formal, actual in zip(method_info.formal_params, actual_params):
             env[0].set(formal.value(), actual)
         # since each method has a single top-level statement, execute it.
@@ -81,9 +95,10 @@ class ObjectDef:
         for i,params in enumerate(formal_params):
             if formal_params[i].type() == Type.CLASS:
                 if formal_params[i].class_name() != actual_params[i].class_name():
-                    return self.interpreter.error(ErrorType.NAME_ERROR)
+                    return True
             elif formal_params[i].type() != actual_params[i].type():
-                return self.interpreter.error(ErrorType.NAME_ERROR)
+                return True
+        return False
             
     def return_type_checker(self, return_type, return_value):
         if return_type == InterpreterBase.VOID_DEF and return_value.value() != None:
