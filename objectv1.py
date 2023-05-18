@@ -113,8 +113,12 @@ class ObjectDef:
                 return True
             
         return False
-            
+    
+    
     def return_type_checker(self, return_type, return_value):
+        valid_return_types = [InterpreterBase.VOID_DEF,InterpreterBase.STRING_DEF,
+                              InterpreterBase.INT_DEF,InterpreterBase.BOOL_DEF]
+        
         if return_type == InterpreterBase.VOID_DEF and return_value.value() != None:
             return self.interpreter.error(ErrorType.TYPE_ERROR)
         elif return_type == InterpreterBase.STRING_DEF and return_value.type() != Type.STRING:
@@ -123,9 +127,22 @@ class ObjectDef:
             return self.interpreter.error(ErrorType.TYPE_ERROR)
         elif return_type == InterpreterBase.BOOL_DEF and return_value.type() != Type.BOOL:
             return self.interpreter.error(ErrorType.TYPE_ERROR)
-        elif return_type in self.classes_defined_set and (return_value.type() != Type.NOTHING 
-            and (return_value.type() != Type.CLASS or return_value.class_name != return_type)):
-            return self.interpreter.error(ErrorType.TYPE_ERROR,"bad class return value ")
+        elif return_type in self.classes_defined_set and return_value.type() != Type.NOTHING:
+            if return_value.type() != Type.CLASS:
+                return self.interpreter.error(ErrorType.TYPE_ERROR,"bad class return value ")
+            else:
+                temp = Value(Type.CLASS, None)
+                temp.set(return_value)
+                while temp.value().parent_obj is not None:
+                    if temp.value().parent_obj.value().get_name() == return_type:
+                        return
+                    temp.set(temp.value().parent_obj)
+                return self.interpreter.error(ErrorType.TYPE_ERROR,"bad class return value ")
+        elif return_type not in valid_return_types and return_type not in self.classes_defined_set:
+            return self.interpreter.error(ErrorType.TYPE_ERROR,"invalid return type ")
+        
+      
+
         
 
     def default_return_selector(self,return_type):
