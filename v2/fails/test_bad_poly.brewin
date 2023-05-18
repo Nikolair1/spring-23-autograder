@@ -1,0 +1,24 @@
+(class person
+  (field string name "jane")
+  (method void say_something () (print name " says hi"))
+)
+
+(class student inherits person
+  (method void say_something ()
+    (print "Can I have a project extension?")
+  )
+)
+
+(class main
+  (field person p null)
+  (field student s null)
+  (method void foo ((student s)) # foo accepts a "student" as an argument
+    (print "whoops")
+  )
+  (method void main ()
+    (begin
+      (set p (new person))
+      (call me foo p)   #calling with person     
+    )
+  )
+)

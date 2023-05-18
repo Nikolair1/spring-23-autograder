@@ -8,12 +8,13 @@
 (class main
  (field person x null)
  (field person y null)
+ (method person testy () (return null))
  (method void main ()
    (begin
       (set x (new person))
       (set y (new person))
       (print (== y null))
-      (set y null)
+      (set y (call me testy))
       (print (== y null))
       (print "HI")
    )

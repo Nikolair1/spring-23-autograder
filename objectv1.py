@@ -77,6 +77,7 @@ class ObjectDef:
             env[0].set(formal.value(), actual)
         # since each method has a single top-level statement, execute it.
         status, return_value = self.__execute_statement(env, method_info.code)
+
         # if the method explicitly used the (return expression) statement to return a value, then return that
         # value back to the caller
         #print("my return type is: ", method_info.return_type)
@@ -131,6 +132,8 @@ class ObjectDef:
             if return_value.type() != Type.CLASS:
                 return self.interpreter.error(ErrorType.TYPE_ERROR,"bad class return value ")
             else:
+                if return_value.value() == None:
+                    return
                 temp = Value(Type.CLASS, None)
                 temp.set(return_value)
                 while temp.value().parent_obj is not None:
@@ -152,7 +155,10 @@ class ObjectDef:
             return Value(Type.BOOL,False)
         elif return_type == InterpreterBase.STRING_DEF:
             return Value(Type.STRING,"")
-        elif return_type in self.classes_defined_set or return_type == InterpreterBase.VOID_DEF:
+        elif return_type in self.classes_defined_set:
+            print("RETURNING CLASS TYPE WITH NONE VALUE")
+            return Value(Type.CLASS)
+        elif return_type == InterpreterBase.VOID_DEF:
             return Value(Type.NOTHING)
         else:
             return self.interpreter.error(ErrorType.TYPE_ERROR,"return type does not exist ")
@@ -312,6 +318,7 @@ class ObjectDef:
     def __set_variable_aux(self, env, var_name, value, line_num):
         # parameter shadows fields
         #print("set variable args", var_name, value, env.get(var_name),self.fields)
+        #print(value.class_name(), value.type(),value.value())
         if value.type() == Type.NOTHING:
             self.interpreter.error(
                 ErrorType.TYPE_ERROR, "can't assign to nothing " + var_name, line_num
@@ -402,7 +409,8 @@ class ObjectDef:
     # expressions could be: constants (true, 5, "blah"), variables (e.g., x), arithmetic/string/logical expressions
     # like (+ 5 6), (+ "abc" "def"), (> a 5), method calls (e.g., (call me foo)), or instantiations (e.g., new dog_class)
     def __evaluate_expression(self, env, expr, line_num_of_statement):
-    
+        if expr == InterpreterBase.NULL_DEF:
+            return Value(Type.CLASS, None)
         if not isinstance(expr, list):
             # locals shadow member variables
             #searches through stack of environments
@@ -453,7 +461,7 @@ class ObjectDef:
                 return self.binary_ops[Type.BOOL][operator](operand1, operand2)
             
             if operand1.type() == operand2.type() and operand1.type() == Type.CLASS:
-                #TODO support derive check here as well
+                
                 if operand1.class_name() != None and operand2.class_name() != None:
                     if operand1.class_name() != operand2.class_name():
                         temp = Value(Type.CLASS, None)

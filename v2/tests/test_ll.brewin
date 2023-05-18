@@ -1,0 +1,20 @@
+(class Node
+    (field Node next null)
+   	(field int val 68)
+   	(method int get_val () 
+        (begin
+            (set next (new Node))
+            (return val)
+        )
+    )  
+ )
+
+(class main
+(field Node n null)
+(method void main ()
+  (begin
+    (set n (new Node))
+    (print (call n get_val))
+  )
+)
+)
