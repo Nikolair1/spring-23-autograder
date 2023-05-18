@@ -456,6 +456,20 @@ class ObjectDef:
                 #TODO support derive check here as well
                 if operand1.class_name() != None and operand2.class_name() != None:
                     if operand1.class_name() != operand2.class_name():
+                        temp = Value(Type.CLASS, None)
+                        
+                        temp.set(operand2)
+                        while temp.value().parent_obj is not None:
+                            if temp.value().parent_obj.value().get_name() == operand1.class_name():
+                               return self.binary_ops[Type.CLASS][operator](operand1, operand2)
+                            temp.set(temp.value().parent_obj)
+
+                        temp.set(operand1)
+                        while temp.value().parent_obj is not None:
+                            if temp.value().parent_obj.value().get_name() == operand2.class_name():
+                               return self.binary_ops[Type.CLASS][operator](operand1, operand2)
+                            temp.set(temp.value().parent_obj)
+                         
                         return self.interpreter.error(
                         ErrorType.TYPE_ERROR,
                         "invalid operator applied to class",

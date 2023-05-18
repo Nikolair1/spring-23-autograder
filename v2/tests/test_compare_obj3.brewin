@@ -1,0 +1,25 @@
+(class person
+  (method void something () (print "hi"))
+)
+
+(class student inherits person
+  (method void something_else () (print "yo"))
+)
+
+(class main
+  (field student x1 null)
+  (field person x2 null)
+  (method string foo ((student ref1) (person ref2)) 
+    (if (== ref1 ref2)   # valid if student inherits from person
+      (return "same object")
+      (return "not same")
+    )
+  )
+  (method void main () 
+    (begin
+      (set x1 (new student))
+      (set x2 (new person))
+      (print (call me foo x1 x2))
+    )
+  )
+)
