@@ -95,12 +95,23 @@ class ObjectDef:
         return default_val
 
     def call_params_checker(self,formal_params,actual_params):
+
         for i,params in enumerate(formal_params):
+            good = False
             if formal_params[i].type() == Type.CLASS:
                 if formal_params[i].class_name() != actual_params[i].class_name():
-                    return True
+                    temp = Value(Type.CLASS, None)
+                    temp.set(actual_params[i])
+                    while temp.value().parent_obj is not None:
+                        if temp.value().parent_obj.value().get_name() == formal_params[i].class_name():
+                            good = True
+                            break
+                        temp.set(temp.value().parent_obj)
+                    if not good:
+                        return True
             elif formal_params[i].type() != actual_params[i].type():
                 return True
+            
         return False
             
     def return_type_checker(self, return_type, return_value):
