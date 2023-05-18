@@ -37,6 +37,7 @@ class Value:
     def set(self, other):
         self.__type = other.type()
         self.__value = other.value()
+        self.__class_name = other.class_name()
 
 
 def validate_field_init(val, type, class_set,interpreter):

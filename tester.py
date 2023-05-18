@@ -137,7 +137,7 @@ def generate_test_suite_v2():
         [
             "types_in_fields_and_params", "types_in_params", "test_return_default1","test_return_default3","test_compare_null",
             "types_in_params2", "test_compare_obj","test_assign_return","test_let","test_let2","test_inher0", "test_inher1",
-            "test_inher2","test_inher3","test_inher4","test_super","test_overloading",
+            "test_inher2","test_inher3","test_inher4","test_super","test_overloading","test_inher9","test_poly"
         ],
         [
             "test_incompat_return1","types_incompat_params","types_incompat_fields","test_incompat_types2", 

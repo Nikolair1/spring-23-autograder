@@ -26,6 +26,9 @@ class ObjectDef:
         self.__map_method_names_to_method_definitions()
         self.__create_map_of_operations_to_lambdas()  # sets up maps to facilitate binary and unary operations, e.g., (+ 5 6)
 
+    def get_name(self):
+        return self.class_def.get_name()
+
     def call_method(self, method_name, actual_params, line_num_of_caller):
         """
         actual_params is a list of Value objects (all parameters are passed by value).
@@ -311,10 +314,18 @@ class ObjectDef:
             else:
                 #print(variable.class_name(),value.class_name())
                 if variable.class_name() != value.class_name():
-                    return self.interpreter.error(ErrorType.TYPE_ERROR, "have to assign class x to class x ")
+                    #here I have to accept any derived classes too
+                    temp = Value(Type.CLASS, None)
+                    temp.set(value)
+                    while temp.value().parent_obj is not None:
+                        if temp.value().parent_obj.value().get_name() == variable.class_name():
+                            return
+                        temp.set(temp.value().parent_obj)
+                    #print(variable.class_name(),value.class_name())
+                    return self.interpreter.error(ErrorType.TYPE_ERROR, "have to assign class x to class x or derived class ")
         elif variable.type() != value.type():
             return self.interpreter.error(ErrorType.TYPE_ERROR, "have to assign primitive x to primitive x ")
-        #TODO have to allow classes to be assigned if are derived
+        
 
     # (if expression (statement) (statement) ) where expresion could be a boolean constant (e.g., true), member
     # variable without ()s, or a boolean expression in parens, like (> 5 a)
