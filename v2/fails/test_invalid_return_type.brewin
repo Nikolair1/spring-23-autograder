@@ -3,7 +3,7 @@
 )
 
 (class student inherits person
-  (method void something_else () (print "yo"))
+  (method voided something_else () (print "yo"))
   (method student foo ((student ref1) (person ref2)) (return me))
 )
 
@@ -17,8 +17,6 @@
     (begin
       (set x1 (new student))
       (set x2 (new person))
-      (print (!= (call x1 foo x1 x2) x2))
-      (print (== (call me foo x1 x2) x1))
       (return me)
     )
   )

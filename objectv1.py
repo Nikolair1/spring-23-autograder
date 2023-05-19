@@ -585,7 +585,11 @@ class ObjectDef:
 
     def __map_method_names_to_method_definitions(self):
         self.methods = {}
+        valid_return_types = [InterpreterBase.VOID_DEF,InterpreterBase.STRING_DEF,
+                              InterpreterBase.INT_DEF,InterpreterBase.BOOL_DEF]
         for method in self.class_def.get_methods():
+            if method.get_return_type() not in valid_return_types and method.get_return_type() not in self.classes_defined_set:
+                    self.interpreter.error(ErrorType.TYPE_ERROR)
             self.methods[method.method_name] = method
 
     def __map_fields_to_values(self):

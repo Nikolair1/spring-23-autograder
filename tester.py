@@ -145,7 +145,7 @@ def generate_test_suite_v2():
             "test_incompat_return1","types_incompat_params","types_incompat_fields","test_incompat_types2", 
             "test_dup_formal_params","test_bad_return_type","test_bad_return_type2" ,"test_bad_args","test_bad_args2",
             "test_bad_compare","test_bad_let", "test_let2", "test_inher1","test_return_assign_type","test_bad_poly",
-            "test_bad_args3", 
+            "test_bad_args3", "test_invalid_return_type"
         ],
     )
     
