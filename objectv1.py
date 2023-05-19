@@ -20,11 +20,18 @@ class ObjectDef:
         self.class_def = class_def  # take class body from 3rd+ list elements, e.g., ["class",classname", [classbody]]
         self.classes_defined_set = classes_defined_set
         self.parent_obj = class_def.get_parent_ref()
+        self.original_me = None
         #print(f"{class_def.get_name()}'s parent obj is {self.parent_obj}")
         self.trace_output = trace_output
         self.__map_fields_to_values()
         self.__map_method_names_to_method_definitions()
         self.__create_map_of_operations_to_lambdas()  # sets up maps to facilitate binary and unary operations, e.g., (+ 5 6)
+
+    def set_me(self,new_me):
+        self.original_me = new_me
+
+    def get_me(self):
+        return self.original_me
 
     def get_name(self):
         return self.class_def.get_name()
@@ -36,6 +43,16 @@ class ObjectDef:
         The caller passes in the line number so we can properly generate an error message.
         The error is then generated at the source (i.e., where the call is initiated).
         """
+        if self.get_me() is not None:
+            print("getting me in call_method ",self.get_me())
+            ref = self.get_me().value()
+            self.set_me(None)
+            if ref.get_name() == self.get_name():
+                #go up to the parent
+                print("we need to go higher")
+            else:
+                print("ref is ",ref.get_name(),"current obj is ", self.get_name(),method_name, actual_params)
+                return ref.call_method(method_name,actual_params,line_num_of_caller)
         if method_name not in self.methods:
             #now we should check the parent
             if self.parent_obj is not None:
@@ -539,7 +556,17 @@ class ObjectDef:
             obj = self.__evaluate_expression(
                 env, obj_name, line_num_of_statement
             ).value()
+            val = None
+            for i in range(len(env)-1, -1, -1):
+                val = env[i].get(obj_name)
+                if val is not None:
+                    break
+            if val is None:
+                if obj_name in self.fields:
+                    val = self.fields[obj_name]
+            obj.set_me(val)
         # prepare the actual arguments for passing
+       
         if obj is None:
             self.interpreter.error(
                 ErrorType.FAULT_ERROR, "null dereference", line_num_of_statement
