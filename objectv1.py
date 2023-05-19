@@ -151,6 +151,8 @@ class ObjectDef:
             else:
                 if return_value.value() == None:
                     return
+                if return_value.value() is not None and return_value.class_name() == return_type:
+                    return
                 temp = Value(Type.CLASS, None)
                 temp.set(return_value)
                 while temp.value().parent_obj is not None:
@@ -431,6 +433,9 @@ class ObjectDef:
         if not isinstance(expr, list):
             # locals shadow member variables
             #searches through stack of environments
+            if expr == InterpreterBase.ME_DEF:
+                return Value(Type.CLASS,self,class_name=self.get_name())
+
             for i in range(len(env)-1, -1, -1):
                 val = env[i].get(expr)
                 if val is not None:

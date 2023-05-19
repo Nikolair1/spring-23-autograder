@@ -1,0 +1,23 @@
+(class person
+  (method void something () (print "hi"))
+)
+
+(class student 
+  (method void something_else () (print "yo"))
+  (method student foo ((student ref1) (person ref2)) (return me))
+)
+
+(class main
+  (field student x1 null)
+  (field person x2 null)
+  (method student foo ((student ref1) (person ref2)) 
+    (return null)
+  )
+  (method void main () 
+    (begin
+      (set x1 (new student))
+      (set x2 (new person))
+      (print (== (call x1 foo x1 x2) x1))
+    )
+  )
+)
