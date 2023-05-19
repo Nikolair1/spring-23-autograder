@@ -43,7 +43,7 @@ class ObjectDef:
         The caller passes in the line number so we can properly generate an error message.
         The error is then generated at the source (i.e., where the call is initiated).
         """
-        if self.get_me() is not None:
+        """  if self.get_me() is not None:
             print("getting me in call_method ",self.get_me())
             ref = self.get_me().value()
             self.set_me(None)
@@ -52,7 +52,7 @@ class ObjectDef:
                 print("we need to go higher")
             else:
                 print("ref is ",ref.get_name(),"current obj is ", self.get_name(),method_name, actual_params)
-                return ref.call_method(method_name,actual_params,line_num_of_caller)
+                return ref.call_method(method_name,actual_params,line_num_of_caller) """
         if method_name not in self.methods:
             #now we should check the parent
             if self.parent_obj is not None:
@@ -556,7 +556,7 @@ class ObjectDef:
             obj = self.__evaluate_expression(
                 env, obj_name, line_num_of_statement
             ).value()
-            val = None
+            """ val = None
             for i in range(len(env)-1, -1, -1):
                 val = env[i].get(obj_name)
                 if val is not None:
@@ -564,7 +564,7 @@ class ObjectDef:
             if val is None:
                 if obj_name in self.fields:
                     val = self.fields[obj_name]
-            obj.set_me(val)
+            obj.set_me(val) """
         # prepare the actual arguments for passing
        
         if obj is None:
