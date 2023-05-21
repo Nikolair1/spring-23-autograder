@@ -1,0 +1,32 @@
+(class person
+      (field string name "jane")
+      (field int x 0)
+      (method string get_name ((string s))
+        (return name)
+      )
+)
+(class student inherits person
+  (field string name "jane")
+  (field int x 0)
+  (method string get_name ((bool s))
+    (return name)
+  )
+)
+
+(class main
+  (field person p null)
+  (field student s null)
+  (field int num 100)
+  (field string str "hey ")
+  (method void main () 
+    (begin 
+      (set s (new student))
+      (print (call s get_name str))
+      (print (== s p))
+      (print (== p null))
+      (set p s)
+      (print (== s p))
+      (print (== s null))
+    )
+  )
+)

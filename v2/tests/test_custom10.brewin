@@ -1,0 +1,29 @@
+(class living_thing
+(method void a ()
+(print "living_thing's A")
+)
+)
+
+(class mammal inherits living_thing
+(method void c ()
+(call me a)
+)
+)
+
+(class human inherits mammal
+(method void a ()
+(print "human's A")
+)
+(method void b ()
+(call me c)
+)
+)
+
+(class main
+(method void main ()
+(begin
+(call (new human) b)
+(call (new mammal) c)
+)
+)
+)

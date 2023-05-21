@@ -71,7 +71,7 @@ class ObjectDef:
                 return parent.call_method(method_name,actual_params,line_num_of_caller)
             else:
                 self.interpreter.error(
-                    ErrorType.TYPE_ERROR,
+                    ErrorType.NAME_ERROR,
                     "invalid number of parameters in call to " + method_name,
                     line_num_of_caller,
                 )
@@ -120,7 +120,7 @@ class ObjectDef:
                 if formal_params[i].class_name() != actual_params[i].class_name():
                     temp = Value(Type.CLASS, None)
                     temp.set(actual_params[i])
-                    while temp.value().parent_obj is not None:
+                    while temp.value() is not None and temp.value().parent_obj is not None:
                         if temp.value().parent_obj.value().get_name() == formal_params[i].class_name():
                             good = True
                             break
@@ -155,7 +155,7 @@ class ObjectDef:
                     return
                 temp = Value(Type.CLASS, None)
                 temp.set(return_value)
-                while temp.value().parent_obj is not None:
+                while temp.value() is not None and temp.value().parent_obj is not None:
                     if temp.value().parent_obj.value().get_name() == return_type:
                         return
                     temp.set(temp.value().parent_obj)
@@ -175,8 +175,8 @@ class ObjectDef:
         elif return_type == InterpreterBase.STRING_DEF:
             return Value(Type.STRING,"")
         elif return_type in self.classes_defined_set:
-            print("RETURNING CLASS TYPE WITH NONE VALUE")
-            return Value(Type.CLASS)
+            print(return_type)
+            return Value(Type.CLASS,class_name = return_type)
         elif return_type == InterpreterBase.VOID_DEF:
             return Value(Type.NOTHING)
         else:
@@ -361,6 +361,16 @@ class ObjectDef:
 
     def __set_type_check(self, variable, value):
         if value.value() == None and variable.type() == Type.CLASS:
+            if value.class_name() is not None:
+                if variable.class_name() == value.class_name():
+                    return
+                temp1 = self.interpreter.instantiate(value.class_name(), None)
+                temp = Value(Type.CLASS, temp1, class_name=value.class_name())
+                while temp.value() is not None and temp.value().parent_obj is not None:
+                    if temp.value().parent_obj.value().get_name() == variable.class_name():
+                        return
+                    temp.set(temp.value().parent_obj)
+                return self.interpreter.error(ErrorType.TYPE_ERROR, "have to assign class x to class x or derived class ")
             pass
         elif variable.type() == Type.CLASS:
             if value.type() != Type.CLASS:
@@ -371,7 +381,7 @@ class ObjectDef:
                     #here I have to accept any derived classes too
                     temp = Value(Type.CLASS, None)
                     temp.set(value)
-                    while temp.value().parent_obj is not None:
+                    while temp.value() is not None and temp.value().parent_obj is not None:
                         if temp.value().parent_obj.value().get_name() == variable.class_name():
                             return
                         temp.set(temp.value().parent_obj)
@@ -489,13 +499,13 @@ class ObjectDef:
                         temp = Value(Type.CLASS, None)
                         
                         temp.set(operand2)
-                        while temp.value().parent_obj is not None:
+                        while temp.value() is not None and temp.value().parent_obj is not None:
                             if temp.value().parent_obj.value().get_name() == operand1.class_name():
                                return self.binary_ops[Type.CLASS][operator](operand1, operand2)
                             temp.set(temp.value().parent_obj)
 
                         temp.set(operand1)
-                        while temp.value().parent_obj is not None:
+                        while temp.value() is not None and temp.value().parent_obj is not None:
                             if temp.value().parent_obj.value().get_name() == operand2.class_name():
                                return self.binary_ops[Type.CLASS][operator](operand1, operand2)
                             temp.set(temp.value().parent_obj)
