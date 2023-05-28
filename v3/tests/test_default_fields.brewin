@@ -1,0 +1,21 @@
+(class main
+  (field int x)
+  (field bool y)
+  (field string z)
+  (field main q)
+
+ (method void foo ()
+   (begin
+     (print "blah")
+     (print x)
+     (print y)
+     (print (== q null))
+   ) 
+ )
+
+ (method void main ()
+  (begin
+    (call me foo)
+  )
+ )
+)

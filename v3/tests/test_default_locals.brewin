@@ -1,0 +1,17 @@
+(class main
+ (method void foo ()
+   (let ((int a) (bool b) (main c) (string d))
+     (print a)
+     (print b)
+     (print (== c null))
+     (print d)
+     (print "hi")
+   )
+ )
+
+ (method void main ()
+  (begin
+    (call me foo)
+  )
+ )
+)
