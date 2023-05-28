@@ -1,0 +1,10 @@
+(class main
+ (field int x 1000)
+ (method int returns_int () (return 5))
+ (method void main ()
+   (begin
+      (set x (call me returns_int))
+      (print x)
+   )
+ )
+)

@@ -1,0 +1,22 @@
+(class main
+  (field string x "hey")
+    (method string whatever ((int a) (int b))
+    (return "hello")
+  )
+  (method fdsfs run ()
+    (print "hi")
+  )
+  (method void do ()
+    (set x (call me whatever x 10))
+  )
+    (method void main ()
+      (begin
+        (print 10) # prints 0
+        (call me do)
+      )
+    )
+  )
+
+
+  
+  

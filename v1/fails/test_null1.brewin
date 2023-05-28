@@ -1,0 +1,9 @@
+(class main
+        (field x 0)
+        (method main (x) 
+        (begin
+          (set x (+ "hello " "world"))
+          (if (== x null) (print "SHIT NULL"))
+          (if (== x "hello world") (print "oh cool"))
+        ))
+      )

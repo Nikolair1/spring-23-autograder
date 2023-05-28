@@ -1,0 +1,4 @@
+(class main
+        (field x 10)
+        (method main (x) (begin (set x "OMG") (print x)))
+      )

@@ -1,0 +1,6 @@
+(class main
+          (field x "butter")
+         (method main () 
+            (if (== "butter" x) (print (+ x "hi")))
+   )
+)

@@ -1,0 +1,26 @@
+(class person
+  (field string name "")
+  (method string get_name ()
+    (return name)
+  )
+  (method void set_name ((string n)) (set name n))
+) 
+
+(class student
+  (field string name "")
+  (method string get_name ()
+    (return name)
+  )
+  (method void set_name ((string n)) (set name n))
+) 
+
+
+(class main
+    (field person p null)
+    (field student s null)
+    (method void main ()
+      (begin
+        (print (== p s))
+      )
+    )
+  )

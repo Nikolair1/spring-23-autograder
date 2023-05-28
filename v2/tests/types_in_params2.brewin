@@ -1,0 +1,26 @@
+(class person
+         (field string name "")
+         (field int age 0)
+         (method void talk ()
+            (print "oh")
+         )
+      )
+
+(class dog
+         (method void bark ()
+            (print "WOOF")
+         )
+      )
+
+(class main
+  (field person pers null)
+  (field dog honey null)
+  (method void ask_dog_to_bark ((dog d)) (call d bark))
+  (method void main ()
+    (begin
+      (set pers (new person))
+      (set honey (new dog))
+      (call me ask_dog_to_bark honey)
+    )
+  )
+)

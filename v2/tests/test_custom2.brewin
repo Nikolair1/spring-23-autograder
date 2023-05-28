@@ -1,0 +1,24 @@
+(class main
+  (field person p null)
+  (field person p2 null)
+  (method void main () 
+    (begin 
+      (set p (new person))
+      (set p2 (call p say_something))
+      (call p print_name)
+      (call p2 print_name)
+      (print 10)
+    )
+  )
+)
+(class person
+        (field string name "jane")
+      (method person say_something ()
+          (begin
+         (set name "arpit")
+          (return me)
+         )
+       )
+       (method void print_name () 
+       (print name))
+)

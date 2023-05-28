@@ -120,77 +120,36 @@ def __generate_test_suite(version, successes, failures):
 
 def generate_test_suite_v1():
     """wrapper for generate_test_suite for v1"""
-    tests = [
-        "test_begin1",
-        "test_begin2",
-        "test_bool_expr",
-        "test_compare_bool",
-        "test_compare_int",
-        "test_compare_null",
-        "test_compare_string",
-        "test_fields",
-        "test_function_call_same_class",
-        "test_fwd_call",
-        "test_if",
-        "test_inputi",
-        "test_inputs",
-        "test_instantiate_and_call1",
-        "test_instantiate_and_call2",
-        "test_instantiate_and_return1",
-        "test_instantiate_and_return2",
-        "test_int_ops",
-        "test_nested_calls",
-        "test_nothing",
-        "test_pass_by_value",
-        "test_print_bool",
-        "test_print_combo",
-        "test_print_int",
-        "test_print_string",
-        "test_recursion1",
-        "test_recursion2",
-        "test_return",
-        "test_return_exit",
-        "test_return_type",
-        "test_set_field",
-        "test_set_param",
-        "test_str_ops",
-        "test_while",
-    ]
-    fails = [
-        "test_call_badargs",
-        "test_call_invalid_func",
-        "test_dup_class",
-        "test_dup_field",
-        "test_dup_method",
-        "test_eval_invalid_var",
-        "test_if",
-        "test_incompat_operands1",
-        "test_incompat_operands2",
-        "test_incompat_operands3",
-        "test_incompat_operands4",
-        "test_instantiate_invalid",
-        "test_null_objref",
-        "test_return_nothing",
-        "test_set_invalid_var",
-        "test_while",
-    ]
-    return __generate_test_suite(1, tests, fails)
+    return __generate_test_suite(
+        1,
+        ["test_return1","test_method1","test_while1","test_while2","test_set_field","test_set_field1","test_inputi","test_field1","test_field2","test_field3","test_field4","test_begin1",
+         "test_begin2","test_begin3","test_if1","test_if2","test_if3","test_print1","test_print2","test_print3", "test_print4", 
+         "test_print5", "test_print6", "test_print7","test_null1","test_method3","test_return1","test_bool1","test_recursion1"],
+        ["test_null_ref","test_method1","test_method2","test_null1","test_main_method","test_incompat_operands1","test_if","test_print1", "test_print2", "test_print3", "test_print4"],
+    )
 
 
 def generate_test_suite_v2():
     """wrapper for generate_test_suite for v2"""
+    
     return __generate_test_suite(
         2,
         [
-            "test_compare_null",
-            "test_return_default1",
-            "test_inher2",
-            "test_inher1",
-            "test_let",
-        ],
-        ["test_incompat_return1", "test_let2", "test_inher1", "test_incompat_types2"],
-    )
+            "types_in_fields_and_params", "types_in_params", "test_return_default1","test_return_default3","test_compare_null",
+            "types_in_params2","test_assign_return","test_let","test_let2","test_inher0", "test_inher1",
+            "test_inher2","test_inher3","test_inher4","test_super","test_overloading","test_inher9","test_poly","test_poly2",
+            "test_return","test_compare_obj2","test_compare_obj3","test_ll","test_compare_obj","test_return_me"
 
+        ],
+        [
+            "test_incompat_return1","types_incompat_params","types_incompat_fields","test_incompat_types2", 
+            "test_dup_formal_params","test_bad_return_type","test_bad_return_type2" ,"test_bad_args","test_bad_args2",
+            "test_bad_compare","test_bad_let", "test_let2", "test_inher1","test_return_assign_type","test_bad_poly",
+            "test_bad_args3", "test_invalid_return_type","test_call_badargs", "test_custom5", "test_custom9",
+            "test_f1"
+        ],
+    )
+    
 
 def generate_test_suite_v3():
     """wrapper for generate_test_suite for v3"""

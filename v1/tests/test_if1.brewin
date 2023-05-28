@@ -1,0 +1,5 @@
+(class main
+         (method main () 
+            (if true (print "that's true") (print "this won't print"))
+   )
+)
