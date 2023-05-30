@@ -1,0 +1,31 @@
+(class rhino
+
+    (method string charge ()
+        (begin
+            (print " i am a rhino ")
+            (throw (+ "NOPE" " haha"))
+            (return "elephant")
+        )
+    )
+)
+
+(class main
+    (field string y "")
+    (field rhino r null)
+    (method string foo ()
+        (begin  
+            (print "yup")
+            (set r (new rhino))
+            (print (== (call r charge) "elephant"))
+            (print "should not print")
+            (return "hi")
+        ) 
+    )
+    (method void main ()
+    (begin
+        (print "printing")
+        (set y (call me foo))
+        (print "not printing")
+    )
+    )
+)

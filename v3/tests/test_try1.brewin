@@ -1,0 +1,18 @@
+(class main
+  (method void bar ()
+     (begin
+        (print "hi")
+        (try
+          (throw "foo")
+          (print "i caught it myself")
+        )
+        (print "bye")
+     )
+  )
+  (method void main ()
+    (begin
+      (call me bar)
+      (print "done!")
+    )
+  )
+)

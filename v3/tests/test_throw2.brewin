@@ -1,0 +1,26 @@
+(class main
+ (field int x 3)
+ (method int bar ()
+   (while true
+     (throw "holy shit")   
+   )
+ )
+ 
+ (method void foo ()
+   (begin
+     (call me bar)  
+     (print "nope")
+   ) 
+ 
+ )
+
+ (method void main ()
+  (while (== x 3)
+    (begin
+       (print "printing")
+       (call me foo)
+       (print "not printing")
+    )
+  )
+ )
+)

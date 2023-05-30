@@ -7,6 +7,9 @@ class Type:
         self.type_name = type_name
         self.supertype_name = supertype_name
 
+    def type_name(self):
+        return self.type_name
+
     def __eq__(self, other):
         return (
             self.type_name == other.type_name
