@@ -1,0 +1,12 @@
+(class main
+  (method void main ()
+    (begin
+       (try
+          (throw "foo")
+          (print "i caught it myself: " exception)
+        )
+        (print "bye")
+      (print "done!")
+    )
+  )
+)

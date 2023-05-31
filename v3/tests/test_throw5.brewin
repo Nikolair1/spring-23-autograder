@@ -1,0 +1,18 @@
+(class main
+ (field int x 3)
+ (method void foo ()
+   (begin
+     (throw "bADDD")  
+     (print "nope")
+   ) 
+ 
+ )
+
+ (method void main ()
+  (begin
+       (print "printing")
+       (throw "baddd")
+       (print "not printing")
+  )
+ )
+)

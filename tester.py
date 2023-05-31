@@ -155,7 +155,7 @@ def generate_test_suite_v3():
     """wrapper for generate_test_suite for v3"""
     tests = [
         "test_str_ops", "test_default_fields", "test_default_locals", "test_throw","test_throw2","test_throw3", 
-        "test_throw4", "test_try1"
+        "test_throw4", "test_throw5","test_try","test_try1",
     ]
 
     '''test_template1,template8,"test_except1",

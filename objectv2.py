@@ -150,6 +150,8 @@ class ObjectDef:
             return self.__execute_let(env, return_type, code)
         elif tok == InterpreterBase.THROW_DEF:
             return self.__execute_throw(env, code)
+        elif tok == InterpreterBase.TRY_DEF:
+            return self.__execute_try(env, return_type, code)
         else:
             # Report error via interpreter
             self.interpreter.error(
@@ -207,6 +209,30 @@ class ObjectDef:
             var_def = VariableDef(var_type, var_name, default_value)
             env.set(var_name, var_def)
 
+    def __execute_try(self, env, return_type, code):
+        statement_to_try = code[1]
+        catch_statement = code[2]
+        status, return_value = self.__execute_statement(env, return_type, statement_to_try)
+        if isinstance(return_value, tuple):
+                status = return_value[0]
+                return_value = return_value[1]
+        if status == self.STATUS_EXCEPTION:
+            #Here I should add exception, which is currently held in return_value to our environment
+            env.block_nest()
+            env.create_new_symbol(InterpreterBase.EXCEPTION_VARIABLE_DEF)
+            var_def = VariableDef(Type(InterpreterBase.STRING_DEF),
+                                  InterpreterBase.EXCEPTION_VARIABLE_DEF,
+                                  return_value
+                                  )
+            env.set(InterpreterBase.EXCEPTION_VARIABLE_DEF, var_def)
+            catch_status, catch_return_value = self.__execute_statement(env, return_type, catch_statement)
+            if isinstance(catch_return_value, tuple):
+                catch_status = catch_return_value[0]
+                catch_return_value = catch_return_value[1]
+            env.block_unnest()
+            return catch_status, catch_return_value
+        else:
+            return status, return_value
 
     def __execute_throw(self, env, code):
         expr = code[1]
