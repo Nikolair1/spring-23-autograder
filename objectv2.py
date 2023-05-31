@@ -79,6 +79,8 @@ class ObjectDef:
             EnvironmentManager()
         )  # maintains lexical environment for function; just params for now
         for formal, actual in zip(method_def.formal_params, actual_params):
+            if isinstance(actual,tuple):
+                return actual
             formal_copy = copy.copy(formal)  # VariableDef obj.
             formal_copy.set_value(actual)  # actual is a Value obj.
             if not env.create_new_symbol(formal_copy.name):
@@ -113,6 +115,9 @@ class ObjectDef:
     # checks whether each formal parameter has a compatible type with the actual parameter
     def __compatible_param_types(self, actual_params, formal_params):
         for formal, actual in zip(formal_params, actual_params):
+            if isinstance(actual,tuple):
+                #print(actual)
+                return True
             if not self.interpreter.check_type_compatibility(
                 formal.type, actual.type(), True
             ):
