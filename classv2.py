@@ -34,7 +34,7 @@
 .  propagate type to null during return and when assigned to variable so we can't compare
    a null pointer of type person to a null pointer of type robot
 """
-
+import copy
 from intbase import InterpreterBase, ErrorType
 from type_valuev2 import Type, create_value, create_default_value
 
@@ -89,6 +89,33 @@ class MethodDef:
 # of the methods in the class, and the superclass information (if any)
 # v2 class definition: [class classname [inherits baseclassname] [field1] [field2] ... [method1] [method2] ...]
 # [] denotes optional syntax
+
+class TemplatedClassDef:
+    def __init__(self,code, interpreter):
+        self.code = code
+        self.interpreter = interpreter
+        #print("templated class def has ",code)
+        
+
+    def create_class_def_from_template(self,class_name,actual_types):
+        #print("actual types to template", actual_types,class_name,self.code)
+        code = copy.copy(self.code)
+        code[0] = InterpreterBase.CLASS_DEF
+        field_replacements = dict(zip(code[2], actual_types))
+        code = replace_fields(code, field_replacements)
+        code.pop(2)
+        code[1] = class_name
+        #print(code)
+        return code
+
+def replace_fields(template, replacements):
+    if isinstance(template, list):
+        return [replace_fields(item, replacements) for item in template]
+    elif isinstance(template, str):
+        return replacements.get(template, template)
+    else:
+        return template
+
 class ClassDef:
     def __init__(self, class_source, interpreter):
         self.interpreter = interpreter
@@ -149,6 +176,7 @@ class ClassDef:
     # returns a VariableDef object that represents that field
     def __create_variable_def_from_field(self, field_def):
         var_def = None
+        #print("field def is ", field_def)
         if len(field_def) == 3:
             #Default Field Values
             type = Type(field_def[1])
@@ -163,11 +191,17 @@ class ClassDef:
         if not self.interpreter.check_type_compatibility(
             var_def.type, var_def.value.type(), True
         ):
-            self.interpreter.error(
-                ErrorType.TYPE_ERROR,
-                "invalid type/type mismatch with field " + field_def[2],
-                field_def[0].line_num,
-            )
+            var_def_type = var_def.type.type_name
+            tokens = var_def_type.split('@')
+            name = tokens[0]
+            param_types = tokens[1:]
+            
+            if not self.interpreter.check_tclasses_compat(name,param_types) or var_def.value.type().type_name != InterpreterBase.NULL_DEF:
+                self.interpreter.error(
+                    ErrorType.TYPE_ERROR,
+                    "invalid type/type mismatch with field " + field_def[2],
+                    field_def[0].line_num,
+                )
         return var_def
 
     def __create_method_list(self, class_body):

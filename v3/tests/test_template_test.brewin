@@ -1,0 +1,19 @@
+(class Foo 
+  (method void chatter ((Duck x)) 
+    (call x quack)         
+  )
+)
+
+(class Duck
+ (method void quack () (print "quack"))
+)
+
+(class main
+  (field Foo t1)
+  (method void main () 
+    (begin
+       (set t1 (new Foo))	
+       (call t1 chatter (new Duck))	
+    )
+  )
+)

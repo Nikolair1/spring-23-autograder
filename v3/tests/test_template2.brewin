@@ -1,0 +1,18 @@
+(tclass Foo (field_type)
+  (method void chatter ((field_type x)) 
+    (call x quack)         # line A
+  )
+)
+
+(class Duck
+ (method void quack () (print "quack"))
+)
+
+(class main
+  (method void main () 
+    (let ((Foo@Duck t1)) 
+       (set t1 (new Foo@Duck))	# works fine
+       (call t1 chatter (new Duck))	# works fine - ducks can talk
+    )
+  )
+)

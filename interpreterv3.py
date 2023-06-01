@@ -1,4 +1,4 @@
-from classv2 import ClassDef
+from classv2 import ClassDef, TemplatedClassDef
 from intbase import InterpreterBase, ErrorType
 from bparser import BParser
 from objectv2 import ObjectDef
@@ -40,13 +40,25 @@ class Interpreter(InterpreterBase):
     # if the user tries to new an class name that does not exist. This will report the line number of the statement
     # with the new command
     def instantiate(self, class_name, line_num_of_statement):
+        class_def = None
         if class_name not in self.class_index:
-            super().error(
-                ErrorType.TYPE_ERROR,
-                f"No class named {class_name} found",
-                line_num_of_statement,
-            )
-        class_def = self.class_index[class_name]
+            t_class_name = class_name.split('@')[0]
+            if t_class_name in self.tclass_index:
+                print("let's initialize this template baby", class_name)
+                t_class_obj = self.tclass_index[t_class_name]
+                actual_types = class_name.split('@')[1:]
+                class_def = t_class_obj.create_class_def_from_template(class_name,actual_types)
+                class_def = ClassDef(class_def, self)
+            else:
+                super().error(
+                    ErrorType.TYPE_ERROR,
+                    f"No class named {class_name} found",
+                    line_num_of_statement,
+                )
+        if class_def is None:
+            class_def = self.class_index[class_name]
+        self.class_index[class_name] = class_def
+        #print("FINAL class def, ",class_def)
         obj = ObjectDef(
             self, class_def, None, self.trace_output
         )  # Create an object based on this class definition
@@ -76,8 +88,12 @@ class Interpreter(InterpreterBase):
     def check_type_compatibility(self, typea, typeb, for_assignment=False):
         return self.type_manager.check_type_compatibility(typea, typeb, for_assignment)
 
+    def check_tclasses_compat(self, name, param_types):
+        return self.type_manager.check_tclasses_compat(name,param_types)
+
     def __map_class_names_to_class_defs(self, program):
         self.class_index = {}
+        self.tclass_index = {}
         for item in program:
             if item[0] == InterpreterBase.CLASS_DEF:
                 if item[1] in self.class_index:
@@ -87,6 +103,15 @@ class Interpreter(InterpreterBase):
                         item[0].line_num,
                     )
                 self.class_index[item[1]] = ClassDef(item, self)
+            elif item[0] == InterpreterBase.TEMPLATE_CLASS_DEF:
+                if item[1] in self.tclass_index:
+                    super().error(
+                        ErrorType.TYPE_ERROR,
+                        f"Duplicate class name {item[1]}",
+                        item[0].line_num,
+                    )
+                self.tclass_index[item[1]] = TemplatedClassDef(item,self)
+
 
     # [class classname inherits superclassname [items]]
     def __add_all_class_types_to_type_manager(self, parsed_program):
@@ -98,3 +123,8 @@ class Interpreter(InterpreterBase):
                 if item[2] == InterpreterBase.INHERITS_DEF:
                     superclass_name = item[3]
                 self.type_manager.add_class_type(class_name, superclass_name)
+            elif item[0] == InterpreterBase.TEMPLATE_CLASS_DEF:
+                class_name = item[1]
+                param_types = item[2]
+                self.type_manager.add_tclass_type(class_name,param_types)
+            
