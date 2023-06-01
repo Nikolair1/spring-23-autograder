@@ -1,0 +1,26 @@
+
+(tclass my_generic_class (field_type)
+  (method void do_your_thing ((field_type x)) (call x talk))
+)
+
+(class duck
+ (method void talk () (print "quack"))
+)
+
+(class person
+ (method void talk () (print "hello"))
+)
+
+(class main
+  (method void main ()
+    (let ((my_generic_class@duck x null)
+          (my_generic_class@person y null))
+      # create a my_generic_class object that works with ducks
+      (set x (new my_generic_class@duck))
+      # create a my_generic_class object that works with persons
+      (set y (new my_generic_class@person))
+      (call x do_your_thing (new duck))
+      (call y do_your_thing (new person))
+    )
+  )
+)

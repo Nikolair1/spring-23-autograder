@@ -195,7 +195,7 @@ class ClassDef:
             tokens = var_def_type.split('@')
             name = tokens[0]
             param_types = tokens[1:]
-            
+            print(name, param_types)
             if not self.interpreter.check_tclasses_compat(name,param_types) or var_def.value.type().type_name != InterpreterBase.NULL_DEF:
                 self.interpreter.error(
                     ErrorType.TYPE_ERROR,
@@ -228,11 +228,12 @@ class ClassDef:
         if not self.interpreter.is_valid_type(
             method_def.return_type.type_name
         ) and method_def.return_type != Type(InterpreterBase.NOTHING_DEF): #checks that return type isn't a defined type or void
-            self.interpreter.error(
-                ErrorType.TYPE_ERROR,
-                "invalid return type for method " + method_def.method_name,
-                method_def.line_num,
-            )
+            if not self.interpreter.check_method_tclass(method_def.return_type.type_name,None):
+                self.interpreter.error(
+                    ErrorType.TYPE_ERROR,
+                    "invalid return type for method " + method_def.method_name,
+                    method_def.line_num,
+                )
         used_param_names = set()
         for param in method_def.formal_params:
             if param.name in used_param_names:
@@ -242,8 +243,10 @@ class ClassDef:
                     method_def.line_num,
                 )
             if not self.interpreter.is_valid_type(param.type.type_name):
-                self.interpreter.error(
-                    ErrorType.TYPE_ERROR,
-                    "invalid type for parameter " + param.name,
-                    method_def.line_num,
-                )
+                print("here")
+                if not self.interpreter.check_method_tclass(param.type.type_name,None):
+                    self.interpreter.error(
+                        ErrorType.TYPE_ERROR,
+                        "invalid type for parameter " + param.name,
+                        method_def.line_num,
+                    )

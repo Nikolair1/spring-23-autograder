@@ -78,6 +78,8 @@ class Interpreter(InterpreterBase):
     def is_valid_type(self, typename):
         return self.type_manager.is_valid_type(typename)
 
+    def check_method_tclass(self, name, return_type):
+        return self.type_manager.check_method_tclass(name, return_type)
     # returns a bool
     def is_a_subtype(self, suspected_supertype, suspected_subtype):
         return self.type_manager.is_a_subtype(suspected_supertype, suspected_subtype)

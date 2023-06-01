@@ -128,6 +128,7 @@ class TypeManager:
                 type_info.supertype_name #check suspected supertype is in the inheritance chain
             )  # check the base class of the subtype next
     def check_tclasses_compat(self, name, param_types):
+        #print(self.map_tclasses)
         if name in self.map_tclasses:
             tuple = self.map_tclasses[name]
             formals = tuple[1]
@@ -136,11 +137,22 @@ class TypeManager:
             else:
                 for param in param_types:
                     if not self.is_valid_type(param):
-                        return False
+                        if param not in formals:
+                            print(param, "here")
+                            return False
             return True
         else:
+            #print("culprit")
             return False    
         
+    def check_method_tclass(self, name, return_type):
+        tokens = name.split('@')
+        class_1 = tokens[0]
+        print(class_1, self.map_tclasses)
+        if class_1 in self.map_tclasses:
+            return True
+        else:
+            return False
 
     # typea and typeb are Type objects
     def check_type_compatibility(self, typea, typeb, for_assignment):
