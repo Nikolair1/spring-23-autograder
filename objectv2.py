@@ -193,8 +193,23 @@ class ObjectDef:
 
     # add all local variables defined in a let to the environment
     def __add_locals_to_env(self, env, var_defs, line_number):
+        print("var_defs", var_defs)
+
         for var_def in var_defs:
             # vardef in the form of (typename varname defvalue)
+            #TODO: Detect Tclasses
+            if '@' in var_def[0]:
+                print(var_def[0])
+                if var_def[0] not in self.interpreter.class_index:
+                    #Not in classes defined, must check tclass_index
+                    var_def_without_at = var_def[0].split('@')[0]
+                    params = var_def[0].split('@')[1:]
+                    if var_def_without_at in self.interpreter.tclass_index:
+                        tclass = self.interpreter.tclass_index[var_def_without_at]
+                        #now we instantiate our tclass into a real class
+                        tclass.create_class_def_from_template(var_def[0],params)
+                        
+
             var_type = Type(var_def[0])
             var_name = var_def[1]
             if len(var_def) == 2:

@@ -1,3 +1,4 @@
+
 from intbase import InterpreterBase
 
 
@@ -83,7 +84,6 @@ def create_default_value(type_def):
 class TypeManager:
     def __init__(self):
         self.map_typename_to_type = {}
-        self.map_tclasses = {}
         self.__setup_primitive_types()
 
     # used to register a new class name (and its supertype name, if present as a valid type so it can be used
@@ -93,12 +93,6 @@ class TypeManager:
     def add_class_type(self, class_name, superclass_name):
         class_type = Type(class_name, superclass_name)
         self.map_typename_to_type[class_name] = class_type
-    
-    def add_tclass_type(self, class_name, param_types):
-       #print("adding tclass", class_name)
-        print(param_types)
-        class_type = Type(class_name)
-        self.map_tclasses[class_name] = (class_type, param_types)
 
     def is_valid_type(self, typename):
         return typename in self.map_typename_to_type
@@ -127,32 +121,6 @@ class TypeManager:
             cur_type = (
                 type_info.supertype_name #check suspected supertype is in the inheritance chain
             )  # check the base class of the subtype next
-    def check_tclasses_compat(self, name, param_types):
-        #print(self.map_tclasses)
-        if name in self.map_tclasses:
-            tuple = self.map_tclasses[name]
-            formals = tuple[1]
-            if len(formals) != len(param_types):
-                return False
-            else:
-                for param in param_types:
-                    if not self.is_valid_type(param):
-                        if param not in formals:
-                            print(param, "here")
-                            return False
-            return True
-        else:
-            #print("culprit")
-            return False    
-        
-    def check_method_tclass(self, name, return_type):
-        tokens = name.split('@')
-        class_1 = tokens[0]
-        print(class_1, self.map_tclasses)
-        if class_1 in self.map_tclasses:
-            return True
-        else:
-            return False
 
     # typea and typeb are Type objects
     def check_type_compatibility(self, typea, typeb, for_assignment):
@@ -161,21 +129,7 @@ class TypeManager:
         if not self.is_valid_type(typea.type_name) or not self.is_valid_type(
             typeb.type_name
         ):
-            tokens = typea.type_name.split('@')
-            tclass = tokens[0]
-            
-            if ((tclass not in self.map_tclasses and tclass != InterpreterBase.NULL_DEF) 
-                or (typea.type_name != typeb.type_name and typea.type_name != InterpreterBase.NULL_DEF and typeb.type_name != InterpreterBase.NULL_DEF)):
-                #print("culprit",typea.type_name,typeb.type_name)
-                return False
-            
-
-            if len(tokens) >= 2:
-                param_types = tokens[1:]
-                #print("here",param_types,tclass)
-                if not self.check_tclasses_compat(tclass,param_types):
-                   return False 
-
+            return False
         # if a is a supertype of b, then the types are compatible
         if self.is_a_subtype(
             typea.type_name, typeb.type_name

@@ -1,42 +1,7 @@
-# pylint: disable=too-few-public-methods
 
-"""
-# v2
-- inheritance
-  (class foo inherits bar ...)
-  dynamic dispatch
-  polymorphism
-- static typing
-.  update formal params to use VariableDef instead of just strings
-.  check parameter type compatability on calls
-.  change syntax for method definitions to:
-   (method method_name ((type1 param1) (type2 param2) ...) (statement))
-.  change MethodDef class to store typename and Type.??? instead of just strings for formal params
-.  create new let statement, which is just like begin except it has locals
-   (let ((type1 param1 val1) (type2 param2 val2)) (statement1) (statement2))
-.  update environment to scope variables by block
-.  update code to ensure variables go out of scope at end of block
-.  change class syntax for field definitions:
-   (field type name init_value)
-.  update FieldDef class to support types of fields
-.  need to support class names for types
-.  update variable assignments to ensure types are consistent
-.  update parameter passing code to make sure actual and formal args are consistent types
-   . must handle polymorphism (passing subtype to f(supertype))
-.  update overload checking code to check not only by # of parameters but by types in inheritance
-.  have return type for methods
-.  update return code to check return type of returned value
-.  add void return type for methods that don't return a value
-.  update method completion code to return default value (0, False, "", null) if no returned value
-.  add test cases for returning a subclass (pass) of the return type, and a superclass (fail)
-.  test for duplicate formal param names and generate error
-.  test for invalid param types and return types
-.  propagate type to null during return and when assigned to variable so we can't compare
-   a null pointer of type person to a null pointer of type robot
-"""
-import copy
 from intbase import InterpreterBase, ErrorType
 from type_valuev2 import Type, create_value, create_default_value
+import copy
 
 class VariableDef:
     # var_type is a Type() and value is a Value()
@@ -84,38 +49,43 @@ class MethodDef:
             formal_params.append(var_def)
         return formal_params
 
-
-# holds definition for a class, including a list of all the fields and their default values, all
-# of the methods in the class, and the superclass information (if any)
-# v2 class definition: [class classname [inherits baseclassname] [field1] [field2] ... [method1] [method2] ...]
-# [] denotes optional syntax
-
-class TemplatedClassDef:
-    def __init__(self,code, interpreter):
-        self.code = code
+class tClassDef:
+    def __init__(self, code, interpreter):
         self.interpreter = interpreter
-        #print("templated class def has ",code)
-        
-
+        self.code = code
+    
+    def code(self):
+        return self.code
+    
     def create_class_def_from_template(self,class_name,actual_types):
-        #print("actual types to template", actual_types,class_name,self.code)
+        print(self.code)
         code = copy.copy(self.code)
         code[0] = InterpreterBase.CLASS_DEF
         field_replacements = dict(zip(code[2], actual_types))
         code = replace_fields(code, field_replacements)
         code.pop(2)
         code[1] = class_name
-        #print(code)
-        return code
+        self.interpreter.type_manager.add_class_type(class_name,None)
+        self.interpreter.class_index[class_name] = ClassDef(code, self.interpreter)
+        
 
 def replace_fields(template, replacements):
     if isinstance(template, list):
         return [replace_fields(item, replacements) for item in template]
     elif isinstance(template, str):
-        return replacements.get(template, template)
+        for key in replacements.keys():
+            if key in template:
+                template = template.replace(key, replacements[key])
+        return template
     else:
         return template
 
+
+
+# holds definition for a class, including a list of all the fields and their default values, all
+# of the methods in the class, and the superclass information (if any)
+# v2 class definition: [class classname [inherits baseclassname] [field1] [field2] ... [method1] [method2] ...]
+# [] denotes optional syntax
 class ClassDef:
     def __init__(self, class_source, interpreter):
         self.interpreter = interpreter
@@ -176,7 +146,18 @@ class ClassDef:
     # returns a VariableDef object that represents that field
     def __create_variable_def_from_field(self, field_def):
         var_def = None
-        #print("field def is ", field_def)
+        if '@' in field_def[1]:
+                #print(field_def[0])
+                if field_def[1] not in self.interpreter.class_index:
+                    #Not in classes defined, must check tclass_index
+                    field_def_without_at = field_def[1].split('@')[0]
+                    params = field_def[1].split('@')[1:]
+                    if field_def_without_at in self.interpreter.tclass_index:
+                        tclass = self.interpreter.tclass_index[field_def_without_at]
+                        #now we instantiate our tclass into a real class
+                        tclass.create_class_def_from_template(field_def[1],params)
+
+
         if len(field_def) == 3:
             #Default Field Values
             type = Type(field_def[1])
@@ -191,17 +172,11 @@ class ClassDef:
         if not self.interpreter.check_type_compatibility(
             var_def.type, var_def.value.type(), True
         ):
-            var_def_type = var_def.type.type_name
-            tokens = var_def_type.split('@')
-            name = tokens[0]
-            param_types = tokens[1:]
-            print(name, param_types)
-            if not self.interpreter.check_tclasses_compat(name,param_types) or var_def.value.type().type_name != InterpreterBase.NULL_DEF:
-                self.interpreter.error(
-                    ErrorType.TYPE_ERROR,
-                    "invalid type/type mismatch with field " + field_def[2],
-                    field_def[0].line_num,
-                )
+            self.interpreter.error(
+                ErrorType.TYPE_ERROR,
+                "invalid type/type mismatch with field " + field_def[2],
+                field_def[0].line_num,
+            )
         return var_def
 
     def __create_method_list(self, class_body):
@@ -228,12 +203,11 @@ class ClassDef:
         if not self.interpreter.is_valid_type(
             method_def.return_type.type_name
         ) and method_def.return_type != Type(InterpreterBase.NOTHING_DEF): #checks that return type isn't a defined type or void
-            if not self.interpreter.check_method_tclass(method_def.return_type.type_name,None):
-                self.interpreter.error(
-                    ErrorType.TYPE_ERROR,
-                    "invalid return type for method " + method_def.method_name,
-                    method_def.line_num,
-                )
+            self.interpreter.error(
+                ErrorType.TYPE_ERROR,
+                "invalid return type for method " + method_def.method_name,
+                method_def.line_num,
+            )
         used_param_names = set()
         for param in method_def.formal_params:
             if param.name in used_param_names:
@@ -243,10 +217,8 @@ class ClassDef:
                     method_def.line_num,
                 )
             if not self.interpreter.is_valid_type(param.type.type_name):
-                print("here")
-                if not self.interpreter.check_method_tclass(param.type.type_name,None):
-                    self.interpreter.error(
-                        ErrorType.TYPE_ERROR,
-                        "invalid type for parameter " + param.name,
-                        method_def.line_num,
-                    )
+                self.interpreter.error(
+                    ErrorType.TYPE_ERROR,
+                    "invalid type for parameter " + param.name,
+                    method_def.line_num,
+                )
