@@ -59,6 +59,7 @@ class tClassDef:
     
     def create_class_def_from_template(self,class_name,actual_types):
         print(self.code)
+        print(actual_types)
         code = copy.copy(self.code)
         code[0] = InterpreterBase.CLASS_DEF
         field_replacements = dict(zip(code[2], actual_types))
@@ -66,17 +67,19 @@ class tClassDef:
         code.pop(2)
         code[1] = class_name
         self.interpreter.type_manager.add_class_type(class_name,None)
-        self.interpreter.class_index[class_name] = ClassDef(code, self.interpreter)
+        self.interpreter.class_index[class_name] = ClassDef(code, self.interpreter) 
         
 
 def replace_fields(template, replacements):
     if isinstance(template, list):
         return [replace_fields(item, replacements) for item in template]
     elif isinstance(template, str):
-        for key in replacements.keys():
-            if key in template:
-                template = template.replace(key, replacements[key])
-        return template
+        # Split and replace only if template is a string
+        if '@' in template:
+            type_name, field = template.split('@')
+            return '@'.join([type_name, replacements.get(field, field)])
+        else:
+            return replacements.get(template, template)
     else:
         return template
 
@@ -146,7 +149,7 @@ class ClassDef:
     # returns a VariableDef object that represents that field
     def __create_variable_def_from_field(self, field_def):
         var_def = None
-        if '@' in field_def[1]:
+        """  if '@' in field_def[1]:
                 #print(field_def[0])
                 if field_def[1] not in self.interpreter.class_index:
                     #Not in classes defined, must check tclass_index
@@ -155,7 +158,7 @@ class ClassDef:
                     if field_def_without_at in self.interpreter.tclass_index:
                         tclass = self.interpreter.tclass_index[field_def_without_at]
                         #now we instantiate our tclass into a real class
-                        tclass.create_class_def_from_template(field_def[1],params)
+                        tclass.create_class_def_from_template(field_def[1],params) """
 
 
         if len(field_def) == 3:
